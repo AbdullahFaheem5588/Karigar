@@ -1,0 +1,838 @@
+import React, {useState, useEffect, useContext} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ImageBackground,
+  Dimensions,
+  TouchableOpacity,
+  ToastAndroid,
+  ActivityIndicator,
+  Alert,
+  Button,
+  ScrollView,
+} from 'react-native';
+import C_TextInput from '../../Components/C_TextInput';
+import color from '../../Assets/colors/colors';
+import BtnComp from '../../Components/BtnComp';
+import {Checkbox} from 'react-native-paper';
+import CustomHeaderIcon from '../../Components/CustomHeaderIcon';
+import {useSelector, useDispatch} from 'react-redux';
+const {height} = Dimensions.get('window');
+const {width} = Dimensions.get('window');
+
+import * as yup from 'yup';
+import {useAuth} from '../../context/AuthProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-simple-toast';
+
+import C_InputSecureEntrylogin from '../../Components/C_InputSecureEntrylogin';
+import {getToken} from '../../utilis/notification';
+import GoogleBtn from '../../Components/GoogelBtn';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+
+import Modal from 'react-native-modal';
+
+export const BASE_URL = 'https://theskilledman.com/api/';
+//export const BASE_URL='https://fisdemoprojects.com/skilledman/api/';
+
+const SignupValidationSchema = yup.object().shape({
+  email: yup
+    .string()
+    .required('Please Enter Your  Email')
+    .matches(/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/, 'Please enter valid email'),
+  password: yup
+    .string()
+    .required('Password is required')
+    .min(6, 'Password must be at least 6 characters')
+    .matches(
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$/,
+      'Password must contain at least one uppercase letter, one lowercase letter, and one digit',
+    ),
+});
+
+const Signin = props => {
+  // const dispatch = useDispatch();
+  const initialValues = {
+    email: '',
+    password: '',
+  };
+
+  // const { providersa } = useSelector(state => state.ProvidersReducer);
+  // console.log('🚀 ~ file: Main.js:9 ~ So ~ providersa:', providersa);
+  const {state, dispatch} = useAuth();
+  const navigation = useNavigation();
+  const [checked, setChecked] = React.useState(false);
+  const [userName, setuserName] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [hide, setHide] = React.useState(true);
+  const [load, setLoad] = React.useState(false);
+  const [isSwitchOn, setIsEnabled] = useState(false);
+  const [loggedIn, setloggedIn] = useState(false);
+  const [userInfo, setuserInfo] = useState(null);
+  const [isModalVisible, setModalVisible] = useState(false);
+  //const [userRole, setUserRole] = useState('');
+
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+  // const _signIn = async () => {
+  //   try {
+  //     await GoogleSignin.hasPlayServices();
+  //     const userinfo = await GoogleSignin.signIn();
+  //     console.log(userinfo);
+  //     setuserInfo(userinfo);
+  //   } catch (error) {
+  //     if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+  //       // user cancelled the login flow
+  //       Alert.alert('Cancel');
+  //     } else if (error.code === statusCodes.IN_PROGRESS) {
+  //       Alert.alert('Signin in progress');
+  //       // operation (f.e. sign in) is in progress already
+  //     } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+  //       Alert.alert('PLAY_SERVICES_NOT_AVAILABLE');
+  //       // play services not available or outdated
+  //     } else {
+  //       // some other error happened
+  //     }
+  //   }
+  // };
+
+  // const SigninGoogle = async () => {
+  //   var myHeaders = new Headers();
+  //   myHeaders.append('Cookie', 'PHPSESSID=gh7fv4e977bp9rldljr4siihlh');
+
+  //   var formdata = new FormData();
+  //   formdata.append('email', 'abccefg11g12@gmail.com');
+  //   formdata.append('password', 'abcdef12');
+  //   formdata.append('token', '123');
+  //   formdata.append('name', 'abcdef12');
+  //   formdata.append('photo', fileInput.files[0], '[PROXY]');
+  //   formdata.append('role', '1');
+
+  //   var requestOptions = {
+  //     method: 'POST',
+  //     headers: myHeaders,
+  //     body: formdata,
+  //     redirect: 'follow',
+  //   };
+
+  //   fetch(
+  //     'https://fisdemoprojects.com/skilledman/api/google_login.php',
+  //     requestOptions,
+  //   )
+  //     .then(response => response.text())
+  //     .then(result => console.log(result))
+  //     .catch(error => console.log('error', error));
+  // };
+
+  const _signIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      console.log(userInfo);
+      setuserInfo(userInfo);
+      SigninGoogle(userInfo);
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+        Alert.alert('Cancel');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        Alert.alert('Signin in progress');
+        // operation (f.e. sign in) is in progress already
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        Alert.alert('PLAY_SERVICES_NOT_AVAILABLE');
+        // play services not available or outdated
+      } else {
+        // some other error happened
+      }
+    }
+  };
+
+  const _signOut = async () => {
+    try {
+      const isSignedIn = await GoogleSignin.isSignedIn();
+
+      if (isSignedIn) {
+        await GoogleSignin.revokeAccess();
+        await GoogleSignin.signOut();
+        setuserInfo(null); // Reset the user info state
+        // Add any additional cleanup or logout logic here
+      } else {
+        console.log('User is not signed in.');
+      }
+    } catch (error) {
+      console.error('Error signing out', error);
+    }
+  };
+
+  // const SigninGoogle = async userInfo => {
+  //   try {
+  //     var myHeaders = new Headers();
+  //     myHeaders.append('Cookie', 'PHPSESSID=gh7fv4e977bp9rldljr4siihlh');
+
+  //     var formdata = new FormData();
+  //     formdata.append('email', userInfo.user.email);
+
+  //     // Use the user's Google ID as the password (you may want to customize this logic)
+  //     formdata.append('password', userInfo.user.id);
+
+  //     // Use the user's authentication ID as the token (you may want to customize this logic)
+  //     formdata.append('token', userInfo.user.auth?.id || '');
+
+  //     formdata.append('name', userInfo.user.name);
+  //     formdata.append('photo', userInfo.user.photo, '[PROXY]');
+
+  //     formdata.append('role', userRole);
+  //     //formdata.append('role', '1');
+
+  //     var requestOptions = {
+  //       method: 'POST',
+  //       headers: myHeaders,
+  //       body: formdata,
+  //       redirect: 'follow',
+  //     };
+
+  //     const response = await fetch(
+  //       'https://fisdemoprojects.com/skilledman/api/google_login.php',
+  //       requestOptions,
+  //     );
+  //     console.log('userinfo', userInfo);
+  //     const result = await response.json();
+  //     console.log(result);
+
+  //     //   if (result.includes('success')) {
+  //     //     // Now you can use the userRole in your logic
+  //     //     console.log('User Role:', userRole);
+
+  //     //     // Example: If role is '1', navigate to 'Parent'
+  //     //     if (userRole === '1') {
+
+  //     //       // If userRole is '1', navigate to 'Parent'
+  //     //       navigation.navigate('Parent');
+
+  //     //     } else if (userRole === '2') {
+
+  //     //       // If userRole is '2', open the modal or navigate to 'AddBusiness'
+  //     //       setModalVisible(true);
+  //     //     } else {
+  //     //       // Handle other roles or conditions
+  //     //       console.log('Unsupported role:', userRole);
+  //     //     }
+  //     //   } else {
+  //     //     // Handle other conditions or errors
+  //     //     console.log('Login was not successful.');
+  //     //   }
+  //     // } catch (error) {
+  //     //   console.error('Error processing Google login:', error);
+  //     // }
+  //     // };
+  //     // const result = await response.text();
+  //     console.log(result);
+  //     if (result.success) {
+  //       // If successful, navigate to 'UserDashboard'
+
+  //       console.log('User Role:', userRole);
+
+  //       //     // Example: If role is '1', navigate to 'Parent'
+  //       // if (userRole === '1') {
+  //       //   navigation.navigate('AddBusiness');
+
+  //       //   // If userRole is '1', navigate to 'Parent'
+  //       // } else if (userRole === '0') {
+  //       //   navigation.navigate('PrivateRoute', {screen: 'Parent'});
+  //       //   // If userRole is '2', open the modal or navigate to 'AddBusiness'
+  //       //   setModalVisible(true);
+  //       // }
+  //       if (userRole == 1 || userRole == 0) {
+  //         navigation.navigate('PrivateRoute', {screen: 'Main'});
+  //       } else {
+  //         // Handle other roles or conditions
+  //         console.log('Unsupported role:', userRole);
+  //       }
+  //     } else {
+  //       // Handle other conditions or errors
+  //       console.log('Login was not successful.');
+  //     }
+  //     //navigation.navigate('UserDashboard');
+  //   } catch (error) {
+  //     console.error('Error processing Google login:', error);
+  //   }
+  // };
+  // const SigninGoogle = async (userInfo, userRole) => {
+  //   try {
+  //     var myHeaders = new Headers();
+  //     myHeaders.append('Cookie', 'PHPSESSID=gh7fv4e977bp9rldljr4siihlh');
+
+  //     var formdata = new FormData();
+  //     formdata.append('email', userInfo.user.email);
+  //     formdata.append('password', userInfo.user.id);
+  //     formdata.append('token', userInfo.user.auth?.id || '');
+  //     formdata.append('name', userInfo.user.name);
+  //     formdata.append('photo', userInfo.user.photo, '[PROXY]');
+  //     formdata.append('role', userRole ? userRole.toString() : ''); // Convert to string
+
+  //     var requestOptions = {
+  //       method: 'POST',
+  //       headers: myHeaders,
+  //       body: formdata,
+  //       redirect: 'follow',
+  //     };
+
+  //     const response = await fetch(
+  //       'https://fisdemoprojects.com/skilledman/api/google_login.php',
+  //       requestOptions,
+  //     );
+  //     console.log('userinfo', userInfo);
+  //     const result = await response.json();
+  //     console.log(result);
+
+  //     if (result.success) {
+  //       console.log('User Role:', userRole);
+
+  //       if (userRole === 1 || userRole === 0) {
+  //         navigation.navigate('PrivateRoute', {screen: 'Parent'});
+  //       } else {
+  //         console.log('Unsupported role:', userRole);
+  //       }
+  //     } else {
+  //       console.log('Login was not successful.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error processing Google login:', error);
+  //   }
+  // };
+  const [userRole, setUserRole] = useState('');
+  //const {signinGoogle} = useAuth();
+  //const { signinGoogle } = useContext(AuthContext);
+  // const SigninGoogle = async userInfo => {
+  //   try {
+  //     await signinGoogle(userInfo);
+  //     if (userInfo && userInfo.user) {
+  //       // Rest of your code remains unchanged
+  //       var myHeaders = new Headers();
+  //       myHeaders.append('Cookie', 'PHPSESSID=gh7fv4e977bp9rldljr4siihlh');
+
+  //       var formdata = new FormData();
+  //       formdata.append('email', userInfo.user.email);
+
+  //       // Use the user's Google ID as the password (you may want to customize this logic)
+  //       formdata.append('password', userInfo.user.id);
+
+  //       // Use the user's authentication ID as the token (you may want to customize this logic)
+  //       formdata.append('token', userInfo.user.auth?.id || '');
+
+  //       formdata.append('name', userInfo.user.name);
+  //       formdata.append('photo', userInfo.user.photo, '[PROXY]');
+
+  //       // formdata.append('role', userRole ? userRole.toString() : ''); // Ensure userRole is a string
+  //       formdata.append('role', userRole);
+
+  //       var requestOptions = {
+  //         method: 'POST',
+  //         headers: myHeaders,
+  //         body: formdata,
+  //         redirect: 'follow',
+  //       };
+
+  //       // const response = await fetch('https://fisdemoprojects.com/skilledman/api/google_login.php', requestOptions,);
+  //       const response = await fetch(
+  //         `${BASE_URL}google_login.php`,
+  //         requestOptions,
+  //       );
+
+  //       console.log('userinfo', userInfo);
+  //       const result = await response.json();
+  //       console.log(result, 'resultabbasi');
+
+  //       global.gid = result.id;
+  //       console.log('result.id', global.gid);
+  //       if (result.success) {
+  //         await AsyncStorage.setItem('user', JSON.stringify(result));
+  //         await AsyncStorage.setItem('role', result.role);
+  //         dispatch({
+  //           type: 'LOGIN',
+  //           payload: {user: result, role: result.role},
+  //         });
+  //         global.roleg = result.role;
+  //         global.gid = result.id;
+
+  //         console.log('result.id', global.gid);
+  //         console.log('resultgooglerole', global.roleg);
+
+  //         // global.usrole=userRole;
+  //         // console.log('globalroleuser',global.usrole);
+  //         console.log('buttonuserrole', userRole);
+
+  //         // Customized the code from here
+  //         if (result.role == 0 || result.role == 1) {
+  //           //navigation.navigate('PrivateRoute', {screen: 'Parent'});
+  //           navigation.navigate('Parent');
+  //         } else {
+  //           console.log('Unsupported role:', result.role);
+  //         }
+  //       }
+  //     } else {
+  //       console.error('Error: userInfo or userInfo.user is null or undefined');
+  //     }
+  //   } catch (error) {
+  //     Alert.alert(
+  //       'Error',
+  //       `This email is already registered: ${error.message}`,
+  //     );
+  //     console.error('Error processing Google login:', error);
+  //   }
+  // };
+
+  const handleSignIn = async values => {
+    const token = await getToken();
+
+    try {
+      setLoad(true);
+      var myHeaders = new Headers();
+
+      myHeaders.append('Cookie', 'PHPSESSID=repq4egpdnsd7ikh50kjova7jd');
+
+      const formdata = new FormData();
+      formdata.append('email', values.email);
+      formdata.append('password', values.password);
+      formdata.append('token', token);
+
+      // const apiUrl = 'https://fisdemoprojects.com/skilledman/api/login.php';
+      const apiUrl = `${BASE_URL}login.php`;
+
+      var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: formdata,
+        redirect: 'follow',
+      };
+      const response = await fetch(apiUrl, requestOptions);
+
+      const result = await response.json();
+      console.log('API response:', result);
+
+      if (result) {
+        setLoad(false);
+        await AsyncStorage.setItem('user', JSON.stringify(result));
+        await AsyncStorage.setItem('role', result.role);
+        dispatch({
+          type: 'LOGIN',
+          payload: {user: result, role: result.role},
+        });
+
+        global.email = result.email;
+        global.id = result.id;
+        global.name = result.name;
+        global.phone_number = result.phone_number;
+        global.address = result.address;
+        global.state = result.state;
+        global.whatsapp = result.whatsapp;
+        global.role = result.role;
+        global.working_experience = result.working_experience;
+        global.profile = result.profile;
+
+        if (result.role == 1 || result.role == 0) {
+          navigation.navigate('Parent');
+
+          if (GoogleSignin.isSignedIn()) {
+            // Call the function to open the modal
+            const states = global.states;
+            global.states == 0;
+          }
+        }
+      } else if (result.error) {
+        setLoad(false);
+        Toast.show('Email or Password does not match');
+        console.error('API response indicates an error.');
+      }
+    } catch (error) {
+      console.error('API error:', error);
+      Toast.show('Email or Password does not match');
+    }
+  };
+
+  // useEffect(() => {
+  //   GoogleSignin.configure();
+  // }, []);
+
+  return (
+    <>
+      <View style={styles.container}>
+        <View>
+          <Text style={styles.titleText}> KARIGAR </Text>
+          <Text style={styles.loginToContinueText}> Login to continue </Text>
+        </View>
+        <View style={styles.inputContainer}>
+          <C_TextInput
+            placeholder="Email"
+            placeholderTextColor={color.default}
+            onChangeText={setuserName}
+            value={userName}
+          />
+
+          {userName && !userName.match(/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/) && (
+            <Text style={styles.errorText}>Please enter a valid email</Text>
+          )}
+        </View>
+        <View style={styles.inputContainer}>
+          <C_InputSecureEntrylogin
+            placeholder="Password"
+            placeholderTextColor={color.default}
+            secureTextEntry={hide}
+            icon="eye-off"
+            onChangeText={setPassword}
+            value={password}
+            onPress={() => setHide(!hide)}
+          />
+          {password && password.length < 6 && (
+            <Text style={styles.errorText}>
+              Password must be at least 6 characters
+            </Text>
+          )}
+
+          {/* {password && !(password.length === 6 || password.length === 8) && (
+  <Text style={styles.errorText}>
+    Password must be either 6 or 8 characters long
+  </Text>
+)} */}
+        </View>
+        <BtnComp
+          BtnStyle={styles.BtnStyle}
+          btnText={
+            load ? <ActivityIndicator size={28} color="#f8f8ff" /> : 'Sign In'
+          }
+          onPressFunc={async () => {
+            try {
+              console.log('userName:', userName);
+              console.log('password:', password);
+              if (userName && password) {
+                await handleSignIn({email: userName, password});
+              } else {
+                Toast.show('Please enter valid email and password');
+              }
+            } catch (error) {
+              console.error('Error during sign in:', error);
+            }
+          }}
+
+          // onPressFunc={() => {
+          //   console.log('userName:', userName);
+          //   console.log('password:', password);
+          //   if (
+          //     userName &&
+          //     password &&
+          //     !userName.match(/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/) &&
+          //     password.length >= 6
+          //   ) {
+          //     handleSignIn({email: userName, password});
+          //   } else {
+          //     Toast.show('Please enter valid email and password');
+          //   }
+          // }}
+        />
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('ForgotPassword');
+          }}>
+          <Text style={styles.forgot}>Forgot Password?</Text>
+        </TouchableOpacity>
+        {/* <Button title="Sign Out" onPress={_signOut} /> */}
+        <TouchableOpacity
+          style={styles.haveAccount}
+          onPress={() => navigation.navigate('SignupScreen')}>
+          <Text style={styles.rememberStyle}>Don't have an account? </Text>
+          <Text style={styles.registerNow}>Sign Up</Text>
+        </TouchableOpacity>
+
+        {/* {isSwitchOn ? null : (
+          <GoogleBtn
+            BtnStyle={styles.googleBtn}
+            btnText="Sign In with"
+            onPressFunc={() => {
+              //_signIn();
+              toggleModal();
+            }}
+            iconName="google"
+            btnTextStyle={styles.btnTextStyle}
+          />
+        )} */}
+        {/* <GoogleBtn
+              BtnStyle={styles.googleBtn}
+              btnText="logout"
+              onPressFunc={() => {
+               _signOut();
+              }}
+              iconName="google"
+              btnTextStyle={styles.btnTextStyle}
+            /> */}
+      </View>
+
+      {/* <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => setModalVisible()}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Sign in as</Text>
+            </View>
+
+            <View style={styles.modalBody}>
+              <View style={styles.btnContainer}>
+                <BtnComp
+                    BtnStyle={styles.acceptStyle}
+                    btnTextStyle={{color: 'white'}}
+                    btnText="Sign In As Provider"
+                    onPressFunc={() => {
+                      setModalVisible(false);
+                      navigation.navigate('PublicRoutes', {
+                        screen: 'AddBusiness',
+                      });
+                      navigation.navigate('AddBusiness');
+                    }}
+                  />
+                <BtnComp
+                    BtnStyle={styles.acceptStyle}
+                    btnTextStyle={{color: 'white'}}
+                    btnText="Sign In with Provider"
+                    onPressFunc={() => {
+                      setUserRole(0);
+                      _signIn();
+                      // navigation.navigate('AddBusiness');
+                      // navigation.navigate('PrivateRoute', {screen: 'Parent'});
+                      setModalVisible(false); // Close the modal if open
+                      // SigninGoogle(userInfo);
+                    }}
+                  />
+
+                <BtnComp
+                  BtnStyle={styles.acceptStyle}
+                  btnTextStyle={{color: 'white'}}
+                  btnText="Sign In with Provider"
+                  onPressFunc={async () => {
+                    await setUserRole('0');
+                    console.log('UserRole set to 0:', userRole);
+                    // global.prrole = userRole;
+                    // console.log('globalproviderrole', global.prrole);
+                    await _signIn();
+                    SigninGoogle(userInfo, userRole);
+                    setModalVisible(false);
+                    _signOut();
+                  }}
+                />
+              </View>
+              <View style={styles.btnContainer}>
+                <BtnComp
+                  BtnStyle={styles.acceptStyle}
+                  btnTextStyle={{color:'white'}}
+                  btnText="Sign In As User"
+                  onPressFunc={() => {
+                    setModalVisible(false);
+                  navigation.navigate('PublicRoutes', { screen: 'AddBusiness' });
+                
+                  }}
+                />
+
+                <BtnComp
+                    BtnStyle={styles.acceptStyle}
+                    btnTextStyle={{color: 'white'}}
+                    btnText="Sign In with User"
+                    onPressFunc={() => {
+                      // Set userRole to '1' when the user clicks "Sign In with User"
+                      setUserRole(1);
+                      _signIn();
+                      //  navigation.navigate('PrivateRoute', {screen: 'Parent'});
+                      setModalVisible(false); // Close the modal if open
+                      //  SigninGoogle(userInfo);
+                    }}
+                  />
+
+                <BtnComp
+                  BtnStyle={styles.acceptStyle}
+                  btnTextStyle={{color: 'white'}}
+                  btnText="Sign In with User"
+                  onPressFunc={async () => {
+                    await setUserRole('1');
+                    console.log('UserRole set to 1:', userRole);
+                    // global.usrole = userRole;
+                    // console.log('globalproviderrole', global.prrole);
+                    await _signIn();
+                    setModalVisible(false);
+                    await SigninGoogle(userInfo, userRole);
+                    _signOut();
+                  }}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal> */}
+    </>
+  );
+};
+
+export default Signin;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    width: '100%',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 10, // Adjust the font size
+    marginTop: 3,
+  },
+  backgroundImg: {
+    width: '100%',
+    height: '100%',
+  },
+  googleBtn: {
+    backgroundColor: color.white,
+    borderWidth: 2,
+    borderColor: color.white,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  btnTextStyle: {
+    color: color.default,
+  },
+  logoStyle: {
+    justifyContent: 'center',
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 70,
+    marginBottom: 25,
+  },
+  logoImg: {
+    width: width / 2,
+    height: height / 4.6,
+  },
+  inputContainer: {
+    width: '90%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  signinText: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: color.white,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  BtnStyle: {
+    marginTop: 15,
+    width: '90%',
+  },
+  fieldRequired: {
+    color: color.darkRed,
+    textAlign: 'left',
+    alignSelf: 'flex-start',
+    paddingLeft: 10,
+    fontWeight: '600',
+  },
+  checkboxStyle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rememberStyle: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: color.darkGray,
+  },
+  forgot: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: color.default,
+    marginVertical: 10,
+    textDecorationLine: 'underline',
+  },
+  checkContainer: {
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '80%',
+    paddingVertical: 10,
+  },
+  registerNow: {
+    color: color.default,
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  haveAccount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  headerIcon: {
+    paddingLeft: 20,
+  },
+  modalContainer: {
+    borderTopRightRadius: 20,
+    borderTopLeftRadius: 20,
+    elevation: 100,
+    alignContent: 'center',
+    justifyContent: 'center',
+    marginTop: '20%',
+    height: '50%',
+  },
+  modalView: {
+    borderRadius: 12,
+    width: '100%',
+    alignSelf: 'center',
+    backgroundColor: color.white,
+  },
+  modalHeader: {
+    backgroundColor: color.default,
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    borderTopRightRadius: 10,
+    borderTopLeftRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  modalTitle: {
+    fontSize: 19,
+    color: color.white,
+    fontWeight: '600',
+  },
+  modalBody: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    height: '90%',
+  },
+  btnContainer: {
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    flexDirection: 'row',
+  },
+  titleText: {
+    color: color.default,
+    fontWeight: 'bold',
+    fontSize: 40,
+    textAlign: 'center',
+  },
+  loginToContinueText: {
+    color: color.black,
+    fontWeight: 'bold',
+    fontSize: 20,
+    marginVertical: 10,
+    textAlign: 'center',
+  },
+});

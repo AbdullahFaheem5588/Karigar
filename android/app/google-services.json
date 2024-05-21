@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "336016778121",
+    "firebase_url": "https://skilledman-17d40-default-rtdb.firebaseio.com",
+    "project_id": "skilledman-17d40",
+    "storage_bucket": "skilledman-17d40.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:336016778121:android:e0e1de5db9af9ea7647758",
+        "android_client_info": {
+          "package_name": "com.skilledman"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCE3YIyWYdcKABqTDDC674ieAxGp9__FDw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
