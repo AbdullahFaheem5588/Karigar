@@ -12,6 +12,7 @@ import {
   Switch,
   Alert,
   ActivityIndicator,
+  ToastAndroid,
 } from 'react-native';
 import C_TextInput from '../../Components/C_TextInput';
 import color from '../../Assets/colors/colors';
@@ -45,78 +46,27 @@ const SignupValidationSchema = yup.object().shape({
     .string()
     .required('Please Enter Your  Email')
     .matches(/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/, 'Please enter valid email'),
-  phone_number: yup
-    .string()
-    .max(15)
-    .required('Phone Number is Required')
-    .matches(/^\d+$/, 'Phone Number must be integer'),
-  // whatsapp: yup
-  //   .string()
-  //   .max(15)
-  //   .required('Phone Number is Required')
-  //   .matches(/^\d+$/, 'whatsapp Number must be integer'),
-  address: yup
-    .string()
-    .min(3, 'Too Short')
-    .max(500, 'Too Long')
-    .required('Please Enter Street Name'),
 });
 
 const Signup = props => {
   const navigation = useNavigation();
-  const [checked, setChecked] = React.useState(false);
-  const [isSwitchOn, setIsEnabled] = useState(false);
-  const [role, setRole] = useState(0);
   const [load, setLoad] = React.useState(false);
-  // const [selectedCountry, setSelectedCountry] = useState('');
-  // const [selectedState, setSelectedState] = useState('');
-  const [countries, setCountries] = useState([]);
+  const roles = [
+    {key: 1, value: 'user'},
+    {key: 2, value: 'provider'},
+  ];
+  const [selectedRole, setSelectedRole] = useState('');
   const [states, setStates] = useState([]);
-  const [cities, setCities] = useState([]);
-  const [countryError, setCountryError] = useState(false);
-  const [stateError, setStateError] = useState(false);
+  const [roleError, setRoleError] = useState(false);
   const pickerRef = useRef();
-  const stateRef = useRef();
-  const defaultStateIsoCode = 'LA';
 
-  // Use React.useState to manage the selected state
-  const [selectedState, setSelectedState] = React.useState(defaultStateIsoCode);
-
-  useEffect(() => {
-    console.log('Selected State:', selectedState);
-  }, [selectedState]);
-
-  const defaultCountryIsoCode = 'NG';
-
-  // Use React.useState to manage the selected country state
-  const [selectedCountry, setSelectedCountry] = React.useState(
-    defaultCountryIsoCode,
-  );
-
-  // console.log('State values ', State.getAllStates());
-
-  const [phoneNumber, setPhoneNumber] = React.useState('');
-  const phoneInput = useRef(null);
-  const [CountryCodeValue, setCountryCode] = useState('ng');
-  const [CountryId, setCountryId] = useState('1');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const focus = useIsFocused();
-  const toggleSwitch = () => {
-    setIsEnabled(previousState => !previousState);
-    if (role === 1) {
-      setRole(0);
-    } else {
-      setRole(1);
-    }
-  };
-  console.log('role value and type', typeof role);
   const initialValues = {
     name: '',
     email: '',
-    phone_number: '',
-    // whatsapp: '',
-    address: '',
-    association: '',
+    password: '',
   };
 
   useEffect(() => {
@@ -150,24 +100,9 @@ const Signup = props => {
     fetchState();
   }, []);
 
-  useEffect(() => {
-    // Load the list of countries when the component mounts
-    const countriesData = Country.getAllCountries();
-    setCountries(countriesData);
-  }, [focus]);
-
-  const onCountryChange = countryCode => {
-    setSelectedCountry(countryCode);
-    setSelectedState('');
-    const countryStates = State.getStatesOfCountry(countryCode);
-    setStates(countryStates);
+  const onRoleChange = selectedRole => {
+    setSelectedRole(selectedRole);
     // setCountryError(false);
-  };
-
-  const handleStateChange = stateCode => {
-    console.log('Selected state:', stateCode);
-    setSelectedState(stateCode); // Update the state with the selected value
-    // ...
   };
 
   // async function googleSignIn() {
@@ -188,7 +123,7 @@ const Signup = props => {
         // Handle form submission here
         console.log('Form data submitted:', states);
         console.log('Form data selectedStatesubmitted:', selectedState);
-        console.log('Form data selectedCountrysubmitted:', selectedCountry);
+        console.log('Form data selectedCountrysubmitted:', confirmPassword);
         // navigation.navigate('OtpScreen');
         try {
           setLoad(true);
@@ -202,17 +137,9 @@ const Signup = props => {
           const formdata = new FormData();
 
           formdata.append('name', value.name);
-          formdata.append('phone_number', value.phone_number);
-          // formdata.append('whatsapp', value.whatsapp);
-          formdata.append('address', value.address);
-          formdata.append('state', selectedState);
-          formdata.append('role', role);
+          formdata.append('role', selectedRole);
           formdata.append('email', value.email);
-          formdata.append('account', 'Verified');
-          formdata.append('country', selectedCountry);
-          formdata.append('association', value.association);
-          formdata.append('latitude', global.lat);
-          formdata.append('longitude', global.long);
+          formdata.append('password', value.password);
 
           // Define the API endpoint
           // const apiUrl ='https://fisdemoprojects.com/skilledman/api/otp_register.php';
@@ -231,12 +158,11 @@ const Signup = props => {
           if (result) {
             setLoad(false);
             global.id = result.id;
-            global.name = result.name;
             global.role = result.role;
             global.name = result.name;
             global.email = result.email;
-            global.address = result.address;
-            global.phone_number = result.phone_number;
+            global.password = result.password;
+            global.role = result.role;
             if (!result.error) {
               navigation.navigate('OtpScreen', {result});
             } else if (result.error) {
@@ -262,38 +188,15 @@ const Signup = props => {
         isValid,
       }) => (
         <ScrollView>
-          <CustomHeaderIcon
-            onPress={() => {
-              props.navigation.goBack();
-            }}
-            headerIcon={styles.headerIcon}
-          />
           <View style={styles.container}>
-            <TouchableOpacity
-              onPress={toggleSwitch}
-              style={styles.switchContainer}>
-              <Text
-                style={
-                  isSwitchOn ? styles.selectedText : styles.unselectedText
-                }>
-                User
-              </Text>
-              <Switch
-                value={isSwitchOn}
-                onValueChange={toggleSwitch}
-                style={styles.switch}
-              />
-              <Text
-                style={
-                  isSwitchOn ? styles.unselectedText : styles.selectedText
-                }>
-                Worker
-              </Text>
-            </TouchableOpacity>
-            <Text style={styles.titleText}> KARIGAR </Text>
+            <Image
+              source={require('../../Assets/icons/sign-up.png')}
+              style={styles.image}
+            />
+            <Text style={styles.signUpToContinueText}>SignUp to continue</Text>
             <View style={styles.inputContainer}>
               <C_TextInput
-                placeholder="Full Name"
+                placeholder="Your Name"
                 placeholderTextColor={color.default}
                 onChangeText={handleChange('name')}
                 onBlur={handleBlur('name')}
@@ -316,89 +219,53 @@ const Signup = props => {
               ) : null}
             </View>
 
-            {/* <View style={styles.numberinputContainer}>
-              <View style={{marginLeft: '30%', width: '30%', height: '50%'}}>
-                <PhoneInput
-                  ref={phoneInput}
-                  defaultValue={phoneNumber}
-                  onSelectCountry={values => {
-                    setCountryId(phoneInput.current.getCountryCode());
-                    setCountryCode(values);
-                  }}
-                  containerStyle={styles.phoneContainer}
-                  textContainerStyle={styles.textInput}
-                  onPressConfirm={v => {
-                    console.log(v);
-                  }}
-                  textStyle={{color: 'black'}}
-                  flagStyle={styles.flagImg}
-                  //defaultCountry="NG"
-                  defaultCode="DM"
-                  layout="second"
-                  withShadow
-                  initialCountry="ng"
-                  // autoFocus
-                />
-              </View>
-
-              <TextInput
-                
-                  placeholder="Phone Number"
-                  placeholderTextColor={color.default}
-                  onChangeText={handleChange('phone_number')}
-                  //  onChangeText={setPhoneNumber}
-
-                  onBlur={handleBlur('phone_number')}
-                  value={values.phone_number}
-                  style={{
-                    backgroundColor: 'transparent',
-                    marginBottom: -10,
-                    flex: 1, // Allow the TextInput to take the remaining space
-                    marginLeft: '1%', // 
-                  }}
-                />
-                {touched.phone_number && errors.phone_number ? (
-                  <Text style={styles.errorText}>{errors.phone_number}</Text>
-                ) : null}
-
-              <C_TextInputno
-                placeholder="Phone Number"
+            <View style={styles.inputContainer}>
+              <C_TextInput
+                placeholder="Password"
                 placeholderTextColor={color.default}
-                onChangeText={handleChange('phone_number')}
-                //  onChangeText={setPhoneNumber}
-
-                onBlur={handleBlur('phone_number')}
-                value={values.phone_number}
-                style={{color: 'black'}}
+                onChangeText={handleChange('password')}
+                onBlur={handleBlur('password')}
+                value={values.password}
               />
-              {touched.phone_number && errors.phone_number ? (
-                <Text style={styles.errorText}>{errors.phone_number}</Text>
+              {touched.password && errors.password ? (
+                <Text style={styles.errorText}>{errors.password}</Text>
               ) : null}
-            </View> */}
+            </View>
+            <View style={styles.inputContainer}>
+              <C_TextInput
+                placeholder="Confirm Password"
+                placeholderTextColor={color.default}
+                onChangeText={setConfirmPassword}
+                value={confirmPassword}
+              />
+              {touched.password && errors.password ? (
+                <Text style={styles.errorText}>{errors.password}</Text>
+              ) : null}
+            </View>
 
             <View style={styles.inputContainer}>
               <View style={styles.DropDownContainer}>
                 <Picker
                   ref={pickerRef}
-                  selectedValue={selectedCountry}
-                  onValueChange={itemValue => onCountryChange(itemValue)}
+                  selectedValue={selectedRole}
+                  onValueChange={itemValue => onRoleChange(itemValue)}
                   enabled={true}
                   mode={'dialog'}
                   dropdownIconColor={color.default}
                   selectionColor={color.yellow}
                   itemStyle={styles.itemsStyle}>
                   <Picker.Item
-                    label="Select Country"
+                    label="SignUp As"
                     value=""
                     color={color.default}
                     fontWeight="bold"
                     fontSize={17}
                   />
-                  {countries.map((country, index) => (
+                  {roles.map((role, index) => (
                     <Picker.Item
-                      key={country.isoCode}
-                      label={country.name}
-                      value={country.isoCode}
+                      key={role.key}
+                      label={role.value}
+                      value={role.value}
                       color={color.default}
                       style={{
                         fontWeight: 'bold',
@@ -409,76 +276,10 @@ const Signup = props => {
                   ))}
                 </Picker>
               </View>
-              {countryError && (
+              {roleError && (
                 <Text style={styles.errorText}>Please select a country.</Text>
               )}
             </View>
-
-            {selectedCountry && (
-              <View style={styles.inputContainer}>
-                <View style={styles.DropDownContainer}>
-                  <Picker
-                    ref={pickerRef}
-                    selectedValue={selectedState}
-                    onValueChange={itemValue => handleStateChange(itemValue)}
-                    enabled={true}
-                    mode={'dialog'}
-                    //  dropdownIconColor={color.default}
-                    //  selectionColor={color.yellow}
-                    // itemStyle={styles.itemsStyle}
-                  >
-                    <Picker.Item
-                      label="Lagos"
-                      value=""
-                      color={color.default}
-                      style={{fontWeight: 'bold', fontSize: 17}}
-                    />
-                    {states?.map((state, index) => (
-                      <Picker.Item
-                        key={state.isoCode}
-                        label={state.name}
-                        value={state.isoCode}
-                        color={color.default}
-                        style={{
-                          fontWeight: 'bold',
-                          fontSize: 17,
-                          backgroundColor: 'white',
-                        }}
-                      />
-                    ))}
-                  </Picker>
-                </View>
-                {stateError && (
-                  <Text style={styles.errorText}>Please select a state</Text>
-                )}
-              </View>
-            )}
-            <View style={styles.inputContainer}>
-              <C_TextInput
-                placeholder="Address"
-                placeholderTextColor={color.default}
-                onChangeText={handleChange('address')}
-                onBlur={handleBlur('address')}
-                value={values.address}
-              />
-              {touched.address && errors.address ? (
-                <Text style={styles.errorText}>{errors.address}</Text>
-              ) : null}
-            </View>
-            {role === 0 ? (
-              <View style={styles.inputContainer}>
-                <C_TextInput
-                  placeholder="Association"
-                  placeholderTextColor={color.default}
-                  onChangeText={handleChange('association')}
-                  onBlur={handleBlur('association')}
-                  value={values.association}
-                />
-                {touched.association && errors.association ? (
-                  <Text style={styles.errorText}>{errors.association}</Text>
-                ) : null}
-              </View>
-            ) : null}
 
             <BtnComp
               BtnStyle={styles.BtnStyle}
@@ -486,22 +287,15 @@ const Signup = props => {
                 load ? (
                   <ActivityIndicator size={28} color="#f8f8ff" />
                 ) : (
-                  'Get Current Location'
+                  'SignUp'
                 )
               }
               onPressFunc={() => {
-                navigation.navigate('Maplatln');
-              }}
-              isValid={isValid}
-            />
-            <BtnComp
-              BtnStyle={styles.BtnStyle}
-              btnText={
-                load ? <ActivityIndicator size={28} color="#f8f8ff" /> : 'Next'
-              }
-              onPressFunc={() => {
-                handleSubmit(values);
-                // navigation.navigate('OtpScreen')
+                if (values.password == confirmPassword) {
+                  handleSubmit(values);
+                  navigation.goBack();
+                } else
+                  ToastAndroid.show('Password Not Matched', ToastAndroid.SHORT);
               }}
               isValid={isValid}
             />
@@ -511,17 +305,6 @@ const Signup = props => {
               <Text style={styles.rememberStyle}>Already have account? </Text>
               <Text style={styles.registerNow}>Sign In</Text>
             </TouchableOpacity>
-            {/* {isSwitchOn ? null : (
-                <GoogleBtn
-                  BtnStyle={styles.googleBtn}
-                  btnText="Sign In with"
-                  onPressFunc={() => {
-                    googleSignIn();
-                  }}
-                  iconName="google"
-                  btnTextStyle={styles.btnTextStyle}
-                />
-              )} */}
           </View>
         </ScrollView>
       )}
@@ -562,7 +345,7 @@ const styles = StyleSheet.create({
     height: height / 5,
   },
   inputContainer: {
-    width: '80%',
+    width: '90%',
 
     justifyContent: 'center',
     alignItems: 'center',
@@ -692,11 +475,15 @@ const styles = StyleSheet.create({
   containerStyle: {
     zIndex: 100,
   },
-  titleText: {
-    color: color.default,
+  signUpToContinueText: {
+    color: color.black,
     fontWeight: 'bold',
-    fontSize: 40,
-    textAlign: 'center',
+    fontSize: 30,
     marginVertical: 10,
+    textAlign: 'center',
+  },
+  image: {
+    width: 200,
+    height: 200,
   },
 });
