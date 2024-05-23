@@ -87,63 +87,9 @@ const Signup = props => {
             onChangeText={val =>
               setUserDetails({...userDetails, username: val})
             }
-<<<<<<< HEAD
             value={userDetails.username}
           />
         </View>
-=======
-          } else {
-            setLoad(false);
-            // Handle the case where status is not true (e.g., show an error message)
-            console.error('API response indicates an error.');
-          }
-        } catch (error) {
-          setLoad(false);
-          console.error('API error:', error);
-        }
-      }}>
-      {({
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        values,
-        errors,
-        touched,
-        isValid,
-      }) => (
-        <ScrollView
-          style={{flex: 1, backgroundColor: color.default, height: '100%'}}>
-          <View style={styles.container}>
-            <Image
-              source={require('../../Assets/icons/sign-up.png')}
-              style={styles.image}
-            />
-            <Text style={styles.signUpToContinueText}>SignUp to continue</Text>
-            <View style={styles.inputContainer}>
-              <C_TextInput
-                placeholder="Your Name"
-                placeholderTextColor={color.default}
-                onChangeText={handleChange('name')}
-                onBlur={handleBlur('name')}
-                value={values.name}
-              />
-              {touched.name && errors.name ? (
-                <Text style={styles.errorText}>{errors.name}</Text>
-              ) : null}
-            </View>
-            <View style={styles.inputContainer}>
-              <C_TextInput
-                placeholder="Email"
-                placeholderTextColor={color.default}
-                onChangeText={handleChange('email')}
-                onBlur={handleBlur('email')}
-                value={values.email}
-              />
-              {touched.email && errors.email ? (
-                <Text style={styles.errorText}>{errors.email}</Text>
-              ) : null}
-            </View>
->>>>>>> f51f308a79f63c618b2e57f088dc3fb23eb29269
 
         <View style={styles.inputContainer}>
           <C_TextInput
@@ -164,7 +110,6 @@ const Signup = props => {
           />
         </View>
 
-<<<<<<< HEAD
         <View style={styles.inputContainer}>
           <View style={styles.DropDownContainer}>
             <Picker
@@ -197,70 +142,6 @@ const Signup = props => {
                 />
               ))}
             </Picker>
-=======
-            <View style={styles.inputContainer}>
-              <View style={styles.DropDownContainer}>
-                <Picker
-                  ref={pickerRef}
-                  selectedValue={selectedRole}
-                  onValueChange={itemValue => onRoleChange(itemValue)}
-                  enabled={true}
-                  mode={'dialog'}
-                  dropdownIconColor={color.default}
-                  selectionColor={color.yellow}
-                  itemStyle={styles.itemsStyle}>
-                  <Picker.Item
-                    label="SignUp As"
-                    value=""
-                    color={color.default}
-                    fontWeight="bold"
-                    fontSize={17}
-                  />
-                  {roles.map((role, index) => (
-                    <Picker.Item
-                      key={role.key}
-                      label={role.value}
-                      value={role.value}
-                      color={color.default}
-                      style={{
-                        fontWeight: 'bold',
-                        fontSize: 17,
-                        backgroundColor: 'white',
-                      }}
-                    />
-                  ))}
-                </Picker>
-              </View>
-              {roleError && (
-                <Text style={styles.errorText}>Please select a role.</Text>
-              )}
-            </View>
-
-            <BtnComp
-              BtnStyle={styles.BtnStyle}
-              btnText={
-                load ? (
-                  <ActivityIndicator size={28} color="#f8f8ff" />
-                ) : (
-                  'SignUp'
-                )
-              }
-              onPressFunc={() => {
-                if (values.password == confirmPassword) {
-                  handleSubmit(values);
-                  navigation.goBack();
-                } else
-                  ToastAndroid.show('Password Not Matched', ToastAndroid.SHORT);
-              }}
-              isValid={isValid}
-            />
-            <TouchableOpacity
-              style={styles.haveAccount}
-              onPress={() => navigation.navigate('Signin')}>
-              <Text style={styles.rememberStyle}>Already have account? </Text>
-              <Text style={styles.registerNow}>Sign In</Text>
-            </TouchableOpacity>
->>>>>>> f51f308a79f63c618b2e57f088dc3fb23eb29269
           </View>
         </View>
 
