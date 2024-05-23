@@ -64,6 +64,338 @@ const Signin = props => {
       .catch(error => console.error(error));
   };
 
+<<<<<<< HEAD
+=======
+  // const SigninGoogle = async () => {
+  //   var myHeaders = new Headers();
+  //   myHeaders.append('Cookie', 'PHPSESSID=gh7fv4e977bp9rldljr4siihlh');
+
+  //   var formdata = new FormData();
+  //   formdata.append('email', 'abccefg11g12@gmail.com');
+  //   formdata.append('password', 'abcdef12');
+  //   formdata.append('token', '123');
+  //   formdata.append('name', 'abcdef12');
+  //   formdata.append('photo', fileInput.files[0], '[PROXY]');
+  //   formdata.append('role', '1');
+
+  //   var requestOptions = {
+  //     method: 'POST',
+  //     headers: myHeaders,
+  //     body: formdata,
+  //     redirect: 'follow',
+  //   };
+
+  //   fetch(
+  //     'https://fisdemoprojects.com/skilledman/api/google_login.php',
+  //     requestOptions,
+  //   )
+  //     .then(response => response.text())
+  //     .then(result => console.log(result))
+  //     .catch(error => console.log('error', error));
+  // };
+
+  // const SigninGoogle = async userInfo => {
+  //   try {
+  //     var myHeaders = new Headers();
+  //     myHeaders.append('Cookie', 'PHPSESSID=gh7fv4e977bp9rldljr4siihlh');
+
+  //     var formdata = new FormData();
+  //     formdata.append('email', userInfo.user.email);
+
+  //     // Use the user's Google ID as the password (you may want to customize this logic)
+  //     formdata.append('password', userInfo.user.id);
+
+  //     // Use the user's authentication ID as the token (you may want to customize this logic)
+  //     formdata.append('token', userInfo.user.auth?.id || '');
+
+  //     formdata.append('name', userInfo.user.name);
+  //     formdata.append('photo', userInfo.user.photo, '[PROXY]');
+
+  //     formdata.append('role', userRole);
+  //     //formdata.append('role', '1');
+
+  //     var requestOptions = {
+  //       method: 'POST',
+  //       headers: myHeaders,
+  //       body: formdata,
+  //       redirect: 'follow',
+  //     };
+
+  //     const response = await fetch(
+  //       'https://fisdemoprojects.com/skilledman/api/google_login.php',
+  //       requestOptions,
+  //     );
+  //     console.log('userinfo', userInfo);
+  //     const result = await response.json();
+  //     console.log(result);
+
+  //     //   if (result.includes('success')) {
+  //     //     // Now you can use the userRole in your logic
+  //     //     console.log('User Role:', userRole);
+
+  //     //     // Example: If role is '1', navigate to 'Parent'
+  //     //     if (userRole === '1') {
+
+  //     //       // If userRole is '1', navigate to 'Parent'
+  //     //       navigation.navigate('Parent');
+
+  //     //     } else if (userRole === '2') {
+
+  //     //       // If userRole is '2', open the modal or navigate to 'AddBusiness'
+  //     //       setModalVisible(true);
+  //     //     } else {
+  //     //       // Handle other roles or conditions
+  //     //       console.log('Unsupported role:', userRole);
+  //     //     }
+  //     //   } else {
+  //     //     // Handle other conditions or errors
+  //     //     console.log('Login was not successful.');
+  //     //   }
+  //     // } catch (error) {
+  //     //   console.error('Error processing Google login:', error);
+  //     // }
+  //     // };
+  //     // const result = await response.text();
+  //     console.log(result);
+  //     if (result.success) {
+  //       // If successful, navigate to 'UserDashboard'
+
+  //       console.log('User Role:', userRole);
+
+  //       //     // Example: If role is '1', navigate to 'Parent'
+  //       // if (userRole === '1') {
+  //       //   navigation.navigate('AddBusiness');
+
+  //       //   // If userRole is '1', navigate to 'Parent'
+  //       // } else if (userRole === '0') {
+  //       //   navigation.navigate('PrivateRoute', {screen: 'Parent'});
+  //       //   // If userRole is '2', open the modal or navigate to 'AddBusiness'
+  //       //   setModalVisible(true);
+  //       // }
+  //       if (userRole == 1 || userRole == 0) {
+  //         navigation.navigate('PrivateRoute', {screen: 'Main'});
+  //       } else {
+  //         // Handle other roles or conditions
+  //         console.log('Unsupported role:', userRole);
+  //       }
+  //     } else {
+  //       // Handle other conditions or errors
+  //       console.log('Login was not successful.');
+  //     }
+  //     //navigation.navigate('UserDashboard');
+  //   } catch (error) {
+  //     console.error('Error processing Google login:', error);
+  //   }
+  // };
+  // const SigninGoogle = async (userInfo, userRole) => {
+  //   try {
+  //     var myHeaders = new Headers();
+  //     myHeaders.append('Cookie', 'PHPSESSID=gh7fv4e977bp9rldljr4siihlh');
+
+  //     var formdata = new FormData();
+  //     formdata.append('email', userInfo.user.email);
+  //     formdata.append('password', userInfo.user.id);
+  //     formdata.append('token', userInfo.user.auth?.id || '');
+  //     formdata.append('name', userInfo.user.name);
+  //     formdata.append('photo', userInfo.user.photo, '[PROXY]');
+  //     formdata.append('role', userRole ? userRole.toString() : ''); // Convert to string
+
+  //     var requestOptions = {
+  //       method: 'POST',
+  //       headers: myHeaders,
+  //       body: formdata,
+  //       redirect: 'follow',
+  //     };
+
+  //     const response = await fetch(
+  //       'https://fisdemoprojects.com/skilledman/api/google_login.php',
+  //       requestOptions,
+  //     );
+  //     console.log('userinfo', userInfo);
+  //     const result = await response.json();
+  //     console.log(result);
+
+  //     if (result.success) {
+  //       console.log('User Role:', userRole);
+
+  //       if (userRole === 1 || userRole === 0) {
+  //         navigation.navigate('PrivateRoute', {screen: 'Parent'});
+  //       } else {
+  //         console.log('Unsupported role:', userRole);
+  //       }
+  //     } else {
+  //       console.log('Login was not successful.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error processing Google login:', error);
+  //   }
+  // };
+  const [userRole, setUserRole] = useState('');
+  //const {signinGoogle} = useAuth();
+  //const { signinGoogle } = useContext(AuthContext);
+  // const SigninGoogle = async userInfo => {
+  //   try {
+  //     await signinGoogle(userInfo);
+  //     if (userInfo && userInfo.user) {
+  //       // Rest of your code remains unchanged
+  //       var myHeaders = new Headers();
+  //       myHeaders.append('Cookie', 'PHPSESSID=gh7fv4e977bp9rldljr4siihlh');
+
+  //       var formdata = new FormData();
+  //       formdata.append('email', userInfo.user.email);
+
+  //       // Use the user's Google ID as the password (you may want to customize this logic)
+  //       formdata.append('password', userInfo.user.id);
+
+  //       // Use the user's authentication ID as the token (you may want to customize this logic)
+  //       formdata.append('token', userInfo.user.auth?.id || '');
+
+  //       formdata.append('name', userInfo.user.name);
+  //       formdata.append('photo', userInfo.user.photo, '[PROXY]');
+
+  //       // formdata.append('role', userRole ? userRole.toString() : ''); // Ensure userRole is a string
+  //       formdata.append('role', userRole);
+
+  //       var requestOptions = {
+  //         method: 'POST',
+  //         headers: myHeaders,
+  //         body: formdata,
+  //         redirect: 'follow',
+  //       };
+
+  //       // const response = await fetch('https://fisdemoprojects.com/skilledman/api/google_login.php', requestOptions,);
+  //       const response = await fetch(
+  //         `${BASE_URL}google_login.php`,
+  //         requestOptions,
+  //       );
+
+  //       console.log('userinfo', userInfo);
+  //       const result = await response.json();
+  //       console.log(result, 'resultabbasi');
+
+  //       global.gid = result.id;
+  //       console.log('result.id', global.gid);
+  //       if (result.success) {
+  //         await AsyncStorage.setItem('user', JSON.stringify(result));
+  //         await AsyncStorage.setItem('role', result.role);
+  //         dispatch({
+  //           type: 'LOGIN',
+  //           payload: {user: result, role: result.role},
+  //         });
+  //         global.roleg = result.role;
+  //         global.gid = result.id;
+
+  //         console.log('result.id', global.gid);
+  //         console.log('resultgooglerole', global.roleg);
+
+  //         // global.usrole=userRole;
+  //         // console.log('globalroleuser',global.usrole);
+  //         console.log('buttonuserrole', userRole);
+
+  //         // Customized the code from here
+  //         if (result.role == 0 || result.role == 1) {
+  //           //navigation.navigate('PrivateRoute', {screen: 'Parent'});
+  //           navigation.navigate('Parent');
+  //         } else {
+  //           console.log('Unsupported role:', result.role);
+  //         }
+  //       }
+  //     } else {
+  //       console.error('Error: userInfo or userInfo.user is null or undefined');
+  //     }
+  //   } catch (error) {
+  //     Alert.alert(
+  //       'Error',
+  //       `This email is already registered: ${error.message}`,
+  //     );
+  //     console.error('Error processing Google login:', error);
+  //   }
+  // };
+
+  const SignInApi = (email, password) => {
+    const formdata = new FormData();
+    formdata.append('email', email);
+    formdata.append('password', password);
+
+    const requestOptions = {
+      method: 'POST',
+      body: formdata,
+      redirect: 'follow',
+    };
+
+    fetch('https://karigar.home.hinews.in/api/login', requestOptions)
+      .then(response => response.json())
+      .then(response => console.log(response))
+      .catch(error => console.error(error));
+  };
+  // const handleSignIn = async values => {
+  //   const token = await getToken();
+
+  //   try {
+  //     setLoad(true);
+  //     var myHeaders = new Headers();
+
+  //     myHeaders.append('Cookie', 'PHPSESSID=repq4egpdnsd7ikh50kjova7jd');
+
+  //     const formdata = new FormData();
+  //     formdata.append('email', values.email);
+  //     formdata.append('password', values.password);
+  //     formdata.append('token', token);
+
+  //     // const apiUrl = 'https://fisdemoprojects.com/skilledman/api/login.php';
+  //     const apiUrl = `${BASE_URL}login.php`;
+
+  //     var requestOptions = {
+  //       method: 'POST',
+  //       headers: myHeaders,
+  //       body: formdata,
+  //       redirect: 'follow',
+  //     };
+  //     const response = await fetch(apiUrl, requestOptions);
+
+  //     const result = await response.json();
+  //     console.log('API response:', result);
+
+  //     if (result) {
+  //       setLoad(false);
+  //       await AsyncStorage.setItem('user', JSON.stringify(result));
+  //       await AsyncStorage.setItem('role', result.role);
+  //       dispatch({
+  //         type: 'LOGIN',
+  //         payload: {user: result, role: result.role},
+  //       });
+
+  //       global.email = result.email;
+  //       global.id = result.id;
+  //       global.name = result.name;
+  //       global.phone_number = result.phone_number;
+  //       global.address = result.address;
+  //       global.state = result.state;
+  //       global.whatsapp = result.whatsapp;
+  //       global.role = result.role;
+  //       global.working_experience = result.working_experience;
+  //       global.profile = result.profile;
+
+  //       if (result.role == 1 || result.role == 0) {
+  //         navigation.navigate('Parent');
+
+  //         if (GoogleSignin.isSignedIn()) {
+  //           // Call the function to open the modal
+  //           const states = global.states;
+  //           global.states == 0;
+  //         }
+  //       }
+  //     } else if (result.error) {
+  //       setLoad(false);
+  //       Toast.show('Email or Password does not match');
+  //       console.error('API response indicates an error.');
+  //     }
+  //   } catch (error) {
+  //     console.error('API error:', error);
+  //     Toast.show('Email or Password does not match');
+  //   }
+  // };
+>>>>>>> f51f308a79f63c618b2e57f088dc3fb23eb29269
   const onPressSignInBtn = async () => {
     try {
       if (userName && password) {
