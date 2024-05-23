@@ -1,314 +1,182 @@
-import React, {useState, useEffect, useRef} from 'react';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import React, {useState, useRef} from 'react';
+import {useNavigation} from '@react-navigation/native';
 import {
   StyleSheet,
   Text,
   View,
   Image,
-  ImageBackground,
   Dimensions,
   TouchableOpacity,
   ScrollView,
-  Switch,
-  Alert,
   ActivityIndicator,
   ToastAndroid,
 } from 'react-native';
 import C_TextInput from '../../Components/C_TextInput';
 import color from '../../Assets/colors/colors';
 import BtnComp from '../../Components/BtnComp';
-import {Checkbox, TextInput} from 'react-native-paper';
-import CustomHeaderIcon from '../../Components/CustomHeaderIcon';
-import GoogleBtn from '../../Components/GoogelBtn';
-const {height} = Dimensions.get('window');
-const {width} = Dimensions.get('window');
-import {Formik} from 'formik';
-import * as yup from 'yup';
-import Toast from 'react-native-simple-toast';
-import {Country, State, City, getAllCountries} from 'country-state-city';
+const {height, width} = Dimensions.get('window');
 import {Picker} from '@react-native-picker/picker';
-//import PhoneInput, {getCountryCallingCode} from 'react-native-phone-input';
-import PhoneInput from 'react-native-phone-input';
-import {_signInwithGoogle} from '../../utilis/firbase';
-import {GoogleSignin, GoogleSigninButton, statusCodes} from '';
-import Modal from 'react-native-modal';
-import Maplatln from './Maps';
-import C_TextInputno from '../../Components/C_TExtinputno';
 import {BASE_URL} from '../Signin/Signin';
-
-const SignupValidationSchema = yup.object().shape({
-  name: yup
-    .string()
-    .min(3, 'Too Short')
-    .max(70, 'Too Long')
-    .required('Please Enter Your First Name'),
-  email: yup
-    .string()
-    .required('Please Enter Your  Email')
-    .matches(/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/, 'Please enter valid email'),
-});
 
 const Signup = props => {
   const navigation = useNavigation();
-  const [load, setLoad] = React.useState(false);
+  const [load, setLoad] = useState(false);
   const roles = [
     {key: 1, value: 'user'},
     {key: 2, value: 'provider'},
   ];
   const [selectedRole, setSelectedRole] = useState('');
-  const [states, setStates] = useState([]);
-  const [roleError, setRoleError] = useState(false);
   const pickerRef = useRef();
-
+  const [userDetails, setUserDetails] = useState({
+    name: '',
+    username: '',
+    password: '',
+    role: selectedRole,
+  });
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const focus = useIsFocused();
-  const initialValues = {
-    name: '',
-    email: '',
-    password: '',
+  const handleSignUp = async () => {
+    try {
+      const formdata = new FormData();
+      formdata.append('name', userDetails.name);
+      formdata.append('username', userDetails.username);
+      formdata.append('password', userDetails.password);
+      formdata.append('type', userDetails.role);
+
+      const requestOptions = {
+        method: 'POST',
+        body: formdata,
+        redirect: 'follow',
+      };
+
+      fetch(BASE_URL + 'register', requestOptions)
+        .then(response => response.text())
+        .then(result => console.log(result))
+        .catch(error => console.error(error));
+    } catch (error) {
+      console.log('error', error);
+    }
   };
-
-  useEffect(() => {
-    const fetchState = async () => {
-      try {
-        var myHeaders = new Headers();
-        myHeaders.append(
-          'Cookie',
-          'PHPSESSID=2a1286fffb4c2a53ccfdd18329031f71',
-        );
-
-        var formdata = new FormData();
-
-        var requestOptions = {
-          method: 'GET',
-          headers: myHeaders,
-          body: formdata,
-          redirect: 'follow',
-        };
-        apiUrl =
-          'https://koboautos.com/shipafrika/member/ajaxfiles/state_code.php?id=3811';
-
-        const response = await fetch(apiUrl, requestOptions);
-        const result = await response.json();
-        if (result) {
-        }
-      } catch (error) {
-        console.log('error', error);
-      }
-    };
-    fetchState();
-  }, []);
 
   const onRoleChange = selectedRole => {
     setSelectedRole(selectedRole);
-    // setCountryError(false);
+    setUserDetails({...userDetails, role: selectedRole});
   };
 
-  // async function googleSignIn() {
-  //   _signInwithGoogle().then(data => {
-  //     if (!data) {
-  //       console.log('=>Error:', 'No Data');
-  //       return;
-  //     }
-  //     console.log('=>Success', data);
-  //   });
-  // }
-
   return (
-    <Formik
-      initialValues={initialValues}
-      validationSchema={SignupValidationSchema}
-      onSubmit={async value => {
-        // Handle form submission here
-        console.log('Form data submitted:', states);
-        console.log('Form data selectedStatesubmitted:', selectedState);
-        console.log('Form data selectedCountrysubmitted:', confirmPassword);
-        // navigation.navigate('OtpScreen');
-        try {
-          setLoad(true);
-          var myHeaders = new Headers();
-
-          // if (selectedCountry == '' || selectedState == '') {
-          //   return;
-          // }
-          myHeaders.append('Cookie', 'PHPSESSID=repq4egpdnsd7ikh50kjova7jd');
-
-          const formdata = new FormData();
-
-          formdata.append('name', value.name);
-          formdata.append('role', selectedRole);
-          formdata.append('email', value.email);
-          formdata.append('password', value.password);
-
-          // Define the API endpoint
-          // const apiUrl ='https://fisdemoprojects.com/skilledman/api/otp_register.php';
-          const apiUrl = `${BASE_URL}otp_register.php`;
-
-          var requestOptions = {
-            method: 'POST',
-            headers: myHeaders,
-            body: formdata,
-            redirect: 'follow',
-          };
-          const response = await fetch(apiUrl, requestOptions);
-
-          const result = await response.json();
-          console.log('API response:', result);
-          if (result) {
-            setLoad(false);
-            global.id = result.id;
-            global.role = result.role;
-            global.name = result.name;
-            global.email = result.email;
-            global.password = result.password;
-            global.role = result.role;
-            if (!result.error) {
-              navigation.navigate('OtpScreen', {result});
-            } else if (result.error) {
-              Toast.showWithGravity(result.error, Toast.LONG, Toast.CENTER);
+    <ScrollView
+      style={{flex: 1, backgroundColor: color.default, height: '100%'}}>
+      <View style={styles.container}>
+        <Image
+          source={require('../../Assets/icons/sign-up.png')}
+          style={styles.image}
+        />
+        <Text style={styles.signUpToContinueText}>SignUp to continue</Text>
+        <View style={styles.inputContainer}>
+          <C_TextInput
+            placeholder="Your Name"
+            placeholderTextColor={color.default}
+            onChangeText={val => setUserDetails({...userDetails, name: val})}
+            value={userDetails.name}
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <C_TextInput
+            placeholder="Email"
+            placeholderTextColor={color.default}
+            onChangeText={val =>
+              setUserDetails({...userDetails, username: val})
             }
-          } else {
-            setLoad(false);
-            // Handle the case where status is not true (e.g., show an error message)
-            console.error('API response indicates an error.');
-          }
-        } catch (error) {
-          setLoad(false);
-          console.error('API error:', error);
-        }
-      }}>
-      {({
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        values,
-        errors,
-        touched,
-        isValid,
-      }) => (
-        <ScrollView>
-          <View style={styles.container}>
-            <Image
-              source={require('../../Assets/icons/sign-up.png')}
-              style={styles.image}
-            />
-            <Text style={styles.signUpToContinueText}>SignUp to continue</Text>
-            <View style={styles.inputContainer}>
-              <C_TextInput
-                placeholder="Your Name"
-                placeholderTextColor={color.default}
-                onChangeText={handleChange('name')}
-                onBlur={handleBlur('name')}
-                value={values.name}
-              />
-              {touched.name && errors.name ? (
-                <Text style={styles.errorText}>{errors.name}</Text>
-              ) : null}
-            </View>
-            <View style={styles.inputContainer}>
-              <C_TextInput
-                placeholder="Email"
-                placeholderTextColor={color.default}
-                onChangeText={handleChange('email')}
-                onBlur={handleBlur('email')}
-                value={values.email}
-              />
-              {touched.email && errors.email ? (
-                <Text style={styles.errorText}>{errors.email}</Text>
-              ) : null}
-            </View>
+            value={userDetails.username}
+          />
+        </View>
 
-            <View style={styles.inputContainer}>
-              <C_TextInput
-                placeholder="Password"
-                placeholderTextColor={color.default}
-                onChangeText={handleChange('password')}
-                onBlur={handleBlur('password')}
-                value={values.password}
-              />
-              {touched.password && errors.password ? (
-                <Text style={styles.errorText}>{errors.password}</Text>
-              ) : null}
-            </View>
-            <View style={styles.inputContainer}>
-              <C_TextInput
-                placeholder="Confirm Password"
-                placeholderTextColor={color.default}
-                onChangeText={setConfirmPassword}
-                value={confirmPassword}
-              />
-              {touched.password && errors.password ? (
-                <Text style={styles.errorText}>{errors.password}</Text>
-              ) : null}
-            </View>
+        <View style={styles.inputContainer}>
+          <C_TextInput
+            placeholder="Password"
+            placeholderTextColor={color.default}
+            onChangeText={val =>
+              setUserDetails({...userDetails, password: val})
+            }
+            value={userDetails.password}
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <C_TextInput
+            placeholder="Confirm Password"
+            placeholderTextColor={color.default}
+            onChangeText={setConfirmPassword}
+            value={confirmPassword}
+          />
+        </View>
 
-            <View style={styles.inputContainer}>
-              <View style={styles.DropDownContainer}>
-                <Picker
-                  ref={pickerRef}
-                  selectedValue={selectedRole}
-                  onValueChange={itemValue => onRoleChange(itemValue)}
-                  enabled={true}
-                  mode={'dialog'}
-                  dropdownIconColor={color.default}
-                  selectionColor={color.yellow}
-                  itemStyle={styles.itemsStyle}>
-                  <Picker.Item
-                    label="SignUp As"
-                    value=""
-                    color={color.default}
-                    fontWeight="bold"
-                    fontSize={17}
-                  />
-                  {roles.map((role, index) => (
-                    <Picker.Item
-                      key={role.key}
-                      label={role.value}
-                      value={role.value}
-                      color={color.default}
-                      style={{
-                        fontWeight: 'bold',
-                        fontSize: 17,
-                        backgroundColor: 'white',
-                      }}
-                    />
-                  ))}
-                </Picker>
-              </View>
-              {roleError && (
-                <Text style={styles.errorText}>Please select a country.</Text>
-              )}
-            </View>
-
-            <BtnComp
-              BtnStyle={styles.BtnStyle}
-              btnText={
-                load ? (
-                  <ActivityIndicator size={28} color="#f8f8ff" />
-                ) : (
-                  'SignUp'
-                )
-              }
-              onPressFunc={() => {
-                if (values.password == confirmPassword) {
-                  handleSubmit(values);
-                  navigation.goBack();
-                } else
-                  ToastAndroid.show('Password Not Matched', ToastAndroid.SHORT);
-              }}
-              isValid={isValid}
-            />
-            <TouchableOpacity
-              style={styles.haveAccount}
-              onPress={() => navigation.navigate('Signin')}>
-              <Text style={styles.rememberStyle}>Already have account? </Text>
-              <Text style={styles.registerNow}>Sign In</Text>
-            </TouchableOpacity>
+        <View style={styles.inputContainer}>
+          <View style={styles.DropDownContainer}>
+            <Picker
+              ref={pickerRef}
+              selectedValue={selectedRole}
+              onValueChange={itemValue => onRoleChange(itemValue)}
+              enabled={true}
+              mode={'dialog'}
+              dropdownIconColor={color.default}
+              selectionColor={color.yellow}
+              itemStyle={styles.itemsStyle}>
+              <Picker.Item
+                label="SignUp As"
+                value=""
+                color={color.default}
+                fontWeight="bold"
+                fontSize={17}
+              />
+              {roles.map((role, index) => (
+                <Picker.Item
+                  key={role.key}
+                  label={role.value}
+                  value={role.value}
+                  color={color.default}
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: 17,
+                    backgroundColor: 'white',
+                  }}
+                />
+              ))}
+            </Picker>
           </View>
-        </ScrollView>
-      )}
-    </Formik>
+        </View>
+
+        <BtnComp
+          BtnStyle={styles.BtnStyle}
+          btnText={
+            load ? <ActivityIndicator size={28} color="#f8f8ff" /> : 'SignUp'
+          }
+          onPressFunc={() => {
+            const {name, username: email, password, role} = userDetails;
+            if (
+              [name, email, password, role].every(field => field.length > 0)
+            ) {
+              if (userDetails.password === confirmPassword) {
+                handleSignUp();
+                navigation.goBack();
+              } else {
+                ToastAndroid.show('Password Not Matched', ToastAndroid.SHORT);
+              }
+            } else {
+              ToastAndroid.show(
+                'Please fill in all fields',
+                ToastAndroid.SHORT,
+              );
+            }
+          }}
+        />
+        <TouchableOpacity
+          style={styles.haveAccount}
+          onPress={() => navigation.navigate('Signin')}>
+          <Text style={styles.rememberStyle}>Already have account? </Text>
+          <Text style={styles.registerNow}>Sign In</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 
@@ -319,7 +187,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 10,
   },
-
   textInput: {
     fontSize: 12,
   },
@@ -328,8 +195,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     flexDirection: 'column',
-    width: '90%',
+    width: '100%',
     paddingVertical: 20,
+    backgroundColor: 'white',
   },
   errorText: {
     color: 'red',
@@ -346,7 +214,6 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: '90%',
-
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 10,
@@ -363,7 +230,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderColor: color.default,
     borderWidth: 1,
-    // borderBottomColor: color.default,
     backgroundColor: 'transparent',
     borderRadius: 6,
   },
@@ -456,8 +322,6 @@ const styles = StyleSheet.create({
     width: '30%',
     textAlign: 'center',
   },
-
-  //
   DropDownContainer: {
     borderColor: color.default,
     borderWidth: 1,
@@ -465,7 +329,7 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 6,
     marginTop: 6,
-    height: 57,
+    paddingVertical: 3,
     backgroundColor: 'white',
   },
   itemsStyle: {
@@ -483,7 +347,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   image: {
-    width: 200,
-    height: 200,
+    width: 130,
+    height: 130,
   },
 });

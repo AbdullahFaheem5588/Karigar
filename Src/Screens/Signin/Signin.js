@@ -38,422 +38,41 @@ import {
 
 import Modal from 'react-native-modal';
 
-export const BASE_URL = 'https://theskilledman.com/api/';
-//export const BASE_URL='https://fisdemoprojects.com/skilledman/api/';
-
-const SignupValidationSchema = yup.object().shape({
-  email: yup
-    .string()
-    .required('Please Enter Your  Email')
-    .matches(/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/, 'Please enter valid email'),
-  password: yup
-    .string()
-    .required('Password is required')
-    .min(6, 'Password must be at least 6 characters')
-    .matches(
-      /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$/,
-      'Password must contain at least one uppercase letter, one lowercase letter, and one digit',
-    ),
-});
+export const BASE_URL = 'http://karigar.home.hinews.in/api/';
 
 const Signin = props => {
-  // const dispatch = useDispatch();
-  const initialValues = {
-    email: '',
-    password: '',
-  };
-
-  // const { providersa } = useSelector(state => state.ProvidersReducer);
-  // console.log('🚀 ~ file: Main.js:9 ~ So ~ providersa:', providersa);
-  const {state, dispatch} = useAuth();
   const navigation = useNavigation();
-  const [checked, setChecked] = React.useState(false);
   const [userName, setuserName] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [hide, setHide] = React.useState(true);
   const [load, setLoad] = React.useState(false);
-  const [isSwitchOn, setIsEnabled] = useState(false);
-  const [loggedIn, setloggedIn] = useState(false);
-  const [userInfo, setuserInfo] = useState(null);
-  const [isModalVisible, setModalVisible] = useState(false);
-  //const [userRole, setUserRole] = useState('');
 
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
+  const SignInApi = (email, password) => {
+    const formdata = new FormData();
+    formdata.append('email', email);
+    formdata.append('password', password);
+
+    const requestOptions = {
+      method: 'POST',
+      body: formdata,
+      redirect: 'follow',
+    };
+
+    fetch('http://karigar.home.hinews.in/api/login', requestOptions)
+      .then(response => response.json())
+      .then(response => console.log(response))
+      .catch(error => console.error(error));
   };
-  // const _signIn = async () => {
-  //   try {
-  //     await GoogleSignin.hasPlayServices();
-  //     const userinfo = await GoogleSignin.signIn();
-  //     console.log(userinfo);
-  //     setuserInfo(userinfo);
-  //   } catch (error) {
-  //     if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-  //       // user cancelled the login flow
-  //       Alert.alert('Cancel');
-  //     } else if (error.code === statusCodes.IN_PROGRESS) {
-  //       Alert.alert('Signin in progress');
-  //       // operation (f.e. sign in) is in progress already
-  //     } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-  //       Alert.alert('PLAY_SERVICES_NOT_AVAILABLE');
-  //       // play services not available or outdated
-  //     } else {
-  //       // some other error happened
-  //     }
-  //   }
-  // };
 
-  // const SigninGoogle = async () => {
-  //   var myHeaders = new Headers();
-  //   myHeaders.append('Cookie', 'PHPSESSID=gh7fv4e977bp9rldljr4siihlh');
-
-  //   var formdata = new FormData();
-  //   formdata.append('email', 'abccefg11g12@gmail.com');
-  //   formdata.append('password', 'abcdef12');
-  //   formdata.append('token', '123');
-  //   formdata.append('name', 'abcdef12');
-  //   formdata.append('photo', fileInput.files[0], '[PROXY]');
-  //   formdata.append('role', '1');
-
-  //   var requestOptions = {
-  //     method: 'POST',
-  //     headers: myHeaders,
-  //     body: formdata,
-  //     redirect: 'follow',
-  //   };
-
-  //   fetch(
-  //     'https://fisdemoprojects.com/skilledman/api/google_login.php',
-  //     requestOptions,
-  //   )
-  //     .then(response => response.text())
-  //     .then(result => console.log(result))
-  //     .catch(error => console.log('error', error));
-  // };
-
-  const _signIn = async () => {
+  const onPressSignInBtn = async () => {
     try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      console.log(userInfo);
-      setuserInfo(userInfo);
-      SigninGoogle(userInfo);
-    } catch (error) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled the login flow
-        Alert.alert('Cancel');
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        Alert.alert('Signin in progress');
-        // operation (f.e. sign in) is in progress already
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        Alert.alert('PLAY_SERVICES_NOT_AVAILABLE');
-        // play services not available or outdated
+      if (userName && password) {
+        await SignInApi(userName, password);
       } else {
-        // some other error happened
-      }
-    }
-  };
-
-  const _signOut = async () => {
-    try {
-      const isSignedIn = await GoogleSignin.isSignedIn();
-
-      if (isSignedIn) {
-        await GoogleSignin.revokeAccess();
-        await GoogleSignin.signOut();
-        setuserInfo(null); // Reset the user info state
-        // Add any additional cleanup or logout logic here
-      } else {
-        console.log('User is not signed in.');
+        Toast.show('Please enter valid email and password');
       }
     } catch (error) {
-      console.error('Error signing out', error);
-    }
-  };
-
-  // const SigninGoogle = async userInfo => {
-  //   try {
-  //     var myHeaders = new Headers();
-  //     myHeaders.append('Cookie', 'PHPSESSID=gh7fv4e977bp9rldljr4siihlh');
-
-  //     var formdata = new FormData();
-  //     formdata.append('email', userInfo.user.email);
-
-  //     // Use the user's Google ID as the password (you may want to customize this logic)
-  //     formdata.append('password', userInfo.user.id);
-
-  //     // Use the user's authentication ID as the token (you may want to customize this logic)
-  //     formdata.append('token', userInfo.user.auth?.id || '');
-
-  //     formdata.append('name', userInfo.user.name);
-  //     formdata.append('photo', userInfo.user.photo, '[PROXY]');
-
-  //     formdata.append('role', userRole);
-  //     //formdata.append('role', '1');
-
-  //     var requestOptions = {
-  //       method: 'POST',
-  //       headers: myHeaders,
-  //       body: formdata,
-  //       redirect: 'follow',
-  //     };
-
-  //     const response = await fetch(
-  //       'https://fisdemoprojects.com/skilledman/api/google_login.php',
-  //       requestOptions,
-  //     );
-  //     console.log('userinfo', userInfo);
-  //     const result = await response.json();
-  //     console.log(result);
-
-  //     //   if (result.includes('success')) {
-  //     //     // Now you can use the userRole in your logic
-  //     //     console.log('User Role:', userRole);
-
-  //     //     // Example: If role is '1', navigate to 'Parent'
-  //     //     if (userRole === '1') {
-
-  //     //       // If userRole is '1', navigate to 'Parent'
-  //     //       navigation.navigate('Parent');
-
-  //     //     } else if (userRole === '2') {
-
-  //     //       // If userRole is '2', open the modal or navigate to 'AddBusiness'
-  //     //       setModalVisible(true);
-  //     //     } else {
-  //     //       // Handle other roles or conditions
-  //     //       console.log('Unsupported role:', userRole);
-  //     //     }
-  //     //   } else {
-  //     //     // Handle other conditions or errors
-  //     //     console.log('Login was not successful.');
-  //     //   }
-  //     // } catch (error) {
-  //     //   console.error('Error processing Google login:', error);
-  //     // }
-  //     // };
-  //     // const result = await response.text();
-  //     console.log(result);
-  //     if (result.success) {
-  //       // If successful, navigate to 'UserDashboard'
-
-  //       console.log('User Role:', userRole);
-
-  //       //     // Example: If role is '1', navigate to 'Parent'
-  //       // if (userRole === '1') {
-  //       //   navigation.navigate('AddBusiness');
-
-  //       //   // If userRole is '1', navigate to 'Parent'
-  //       // } else if (userRole === '0') {
-  //       //   navigation.navigate('PrivateRoute', {screen: 'Parent'});
-  //       //   // If userRole is '2', open the modal or navigate to 'AddBusiness'
-  //       //   setModalVisible(true);
-  //       // }
-  //       if (userRole == 1 || userRole == 0) {
-  //         navigation.navigate('PrivateRoute', {screen: 'Main'});
-  //       } else {
-  //         // Handle other roles or conditions
-  //         console.log('Unsupported role:', userRole);
-  //       }
-  //     } else {
-  //       // Handle other conditions or errors
-  //       console.log('Login was not successful.');
-  //     }
-  //     //navigation.navigate('UserDashboard');
-  //   } catch (error) {
-  //     console.error('Error processing Google login:', error);
-  //   }
-  // };
-  // const SigninGoogle = async (userInfo, userRole) => {
-  //   try {
-  //     var myHeaders = new Headers();
-  //     myHeaders.append('Cookie', 'PHPSESSID=gh7fv4e977bp9rldljr4siihlh');
-
-  //     var formdata = new FormData();
-  //     formdata.append('email', userInfo.user.email);
-  //     formdata.append('password', userInfo.user.id);
-  //     formdata.append('token', userInfo.user.auth?.id || '');
-  //     formdata.append('name', userInfo.user.name);
-  //     formdata.append('photo', userInfo.user.photo, '[PROXY]');
-  //     formdata.append('role', userRole ? userRole.toString() : ''); // Convert to string
-
-  //     var requestOptions = {
-  //       method: 'POST',
-  //       headers: myHeaders,
-  //       body: formdata,
-  //       redirect: 'follow',
-  //     };
-
-  //     const response = await fetch(
-  //       'https://fisdemoprojects.com/skilledman/api/google_login.php',
-  //       requestOptions,
-  //     );
-  //     console.log('userinfo', userInfo);
-  //     const result = await response.json();
-  //     console.log(result);
-
-  //     if (result.success) {
-  //       console.log('User Role:', userRole);
-
-  //       if (userRole === 1 || userRole === 0) {
-  //         navigation.navigate('PrivateRoute', {screen: 'Parent'});
-  //       } else {
-  //         console.log('Unsupported role:', userRole);
-  //       }
-  //     } else {
-  //       console.log('Login was not successful.');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error processing Google login:', error);
-  //   }
-  // };
-  const [userRole, setUserRole] = useState('');
-  //const {signinGoogle} = useAuth();
-  //const { signinGoogle } = useContext(AuthContext);
-  // const SigninGoogle = async userInfo => {
-  //   try {
-  //     await signinGoogle(userInfo);
-  //     if (userInfo && userInfo.user) {
-  //       // Rest of your code remains unchanged
-  //       var myHeaders = new Headers();
-  //       myHeaders.append('Cookie', 'PHPSESSID=gh7fv4e977bp9rldljr4siihlh');
-
-  //       var formdata = new FormData();
-  //       formdata.append('email', userInfo.user.email);
-
-  //       // Use the user's Google ID as the password (you may want to customize this logic)
-  //       formdata.append('password', userInfo.user.id);
-
-  //       // Use the user's authentication ID as the token (you may want to customize this logic)
-  //       formdata.append('token', userInfo.user.auth?.id || '');
-
-  //       formdata.append('name', userInfo.user.name);
-  //       formdata.append('photo', userInfo.user.photo, '[PROXY]');
-
-  //       // formdata.append('role', userRole ? userRole.toString() : ''); // Ensure userRole is a string
-  //       formdata.append('role', userRole);
-
-  //       var requestOptions = {
-  //         method: 'POST',
-  //         headers: myHeaders,
-  //         body: formdata,
-  //         redirect: 'follow',
-  //       };
-
-  //       // const response = await fetch('https://fisdemoprojects.com/skilledman/api/google_login.php', requestOptions,);
-  //       const response = await fetch(
-  //         `${BASE_URL}google_login.php`,
-  //         requestOptions,
-  //       );
-
-  //       console.log('userinfo', userInfo);
-  //       const result = await response.json();
-  //       console.log(result, 'resultabbasi');
-
-  //       global.gid = result.id;
-  //       console.log('result.id', global.gid);
-  //       if (result.success) {
-  //         await AsyncStorage.setItem('user', JSON.stringify(result));
-  //         await AsyncStorage.setItem('role', result.role);
-  //         dispatch({
-  //           type: 'LOGIN',
-  //           payload: {user: result, role: result.role},
-  //         });
-  //         global.roleg = result.role;
-  //         global.gid = result.id;
-
-  //         console.log('result.id', global.gid);
-  //         console.log('resultgooglerole', global.roleg);
-
-  //         // global.usrole=userRole;
-  //         // console.log('globalroleuser',global.usrole);
-  //         console.log('buttonuserrole', userRole);
-
-  //         // Customized the code from here
-  //         if (result.role == 0 || result.role == 1) {
-  //           //navigation.navigate('PrivateRoute', {screen: 'Parent'});
-  //           navigation.navigate('Parent');
-  //         } else {
-  //           console.log('Unsupported role:', result.role);
-  //         }
-  //       }
-  //     } else {
-  //       console.error('Error: userInfo or userInfo.user is null or undefined');
-  //     }
-  //   } catch (error) {
-  //     Alert.alert(
-  //       'Error',
-  //       `This email is already registered: ${error.message}`,
-  //     );
-  //     console.error('Error processing Google login:', error);
-  //   }
-  // };
-
-  const handleSignIn = async values => {
-    const token = await getToken();
-
-    try {
-      setLoad(true);
-      var myHeaders = new Headers();
-
-      myHeaders.append('Cookie', 'PHPSESSID=repq4egpdnsd7ikh50kjova7jd');
-
-      const formdata = new FormData();
-      formdata.append('email', values.email);
-      formdata.append('password', values.password);
-      formdata.append('token', token);
-
-      // const apiUrl = 'https://fisdemoprojects.com/skilledman/api/login.php';
-      const apiUrl = `${BASE_URL}login.php`;
-
-      var requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: formdata,
-        redirect: 'follow',
-      };
-      const response = await fetch(apiUrl, requestOptions);
-
-      const result = await response.json();
-      console.log('API response:', result);
-
-      if (result) {
-        setLoad(false);
-        await AsyncStorage.setItem('user', JSON.stringify(result));
-        await AsyncStorage.setItem('role', result.role);
-        dispatch({
-          type: 'LOGIN',
-          payload: {user: result, role: result.role},
-        });
-
-        global.email = result.email;
-        global.id = result.id;
-        global.name = result.name;
-        global.phone_number = result.phone_number;
-        global.address = result.address;
-        global.state = result.state;
-        global.whatsapp = result.whatsapp;
-        global.role = result.role;
-        global.working_experience = result.working_experience;
-        global.profile = result.profile;
-
-        if (result.role == 1 || result.role == 0) {
-          navigation.navigate('Parent');
-
-          if (GoogleSignin.isSignedIn()) {
-            // Call the function to open the modal
-            const states = global.states;
-            global.states == 0;
-          }
-        }
-      } else if (result.error) {
-        setLoad(false);
-        Toast.show('Email or Password does not match');
-        console.error('API response indicates an error.');
-      }
-    } catch (error) {
-      console.error('API error:', error);
-      Toast.show('Email or Password does not match');
+      console.error('Error during sign in:', error);
     }
   };
 
@@ -495,46 +114,13 @@ const Signin = props => {
               Password must be at least 6 characters
             </Text>
           )}
-
-          {/* {password && !(password.length === 6 || password.length === 8) && (
-  <Text style={styles.errorText}>
-    Password must be either 6 or 8 characters long
-  </Text>
-)} */}
         </View>
         <BtnComp
           BtnStyle={styles.BtnStyle}
           btnText={
             load ? <ActivityIndicator size={28} color="#f8f8ff" /> : 'Sign In'
           }
-          onPressFunc={async () => {
-            try {
-              console.log('userName:', userName);
-              console.log('password:', password);
-              if (userName && password) {
-                await handleSignIn({email: userName, password});
-              } else {
-                Toast.show('Please enter valid email and password');
-              }
-            } catch (error) {
-              console.error('Error during sign in:', error);
-            }
-          }}
-
-          // onPressFunc={() => {
-          //   console.log('userName:', userName);
-          //   console.log('password:', password);
-          //   if (
-          //     userName &&
-          //     password &&
-          //     !userName.match(/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/) &&
-          //     password.length >= 6
-          //   ) {
-          //     handleSignIn({email: userName, password});
-          //   } else {
-          //     Toast.show('Please enter valid email and password');
-          //   }
-          // }}
+          onPressFunc={onPressSignInBtn}
         />
         <TouchableOpacity
           onPress={() => {
@@ -542,138 +128,13 @@ const Signin = props => {
           }}>
           <Text style={styles.forgot}>Forgot Password?</Text>
         </TouchableOpacity>
-        {/* <Button title="Sign Out" onPress={_signOut} /> */}
         <TouchableOpacity
           style={styles.haveAccount}
           onPress={() => navigation.navigate('SignupScreen')}>
           <Text style={styles.rememberStyle}>Don't have an account? </Text>
           <Text style={styles.registerNow}>Sign Up</Text>
         </TouchableOpacity>
-
-        {/* {isSwitchOn ? null : (
-          <GoogleBtn
-            BtnStyle={styles.googleBtn}
-            btnText="Sign In with"
-            onPressFunc={() => {
-              //_signIn();
-              toggleModal();
-            }}
-            iconName="google"
-            btnTextStyle={styles.btnTextStyle}
-          />
-        )} */}
-        {/* <GoogleBtn
-              BtnStyle={styles.googleBtn}
-              btnText="logout"
-              onPressFunc={() => {
-               _signOut();
-              }}
-              iconName="google"
-              btnTextStyle={styles.btnTextStyle}
-            /> */}
       </View>
-
-      {/* <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => setModalVisible()}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Sign in as</Text>
-            </View>
-
-            <View style={styles.modalBody}>
-              <View style={styles.btnContainer}>
-                <BtnComp
-                    BtnStyle={styles.acceptStyle}
-                    btnTextStyle={{color: 'white'}}
-                    btnText="Sign In As Provider"
-                    onPressFunc={() => {
-                      setModalVisible(false);
-                      navigation.navigate('PublicRoutes', {
-                        screen: 'AddBusiness',
-                      });
-                      navigation.navigate('AddBusiness');
-                    }}
-                  />
-                <BtnComp
-                    BtnStyle={styles.acceptStyle}
-                    btnTextStyle={{color: 'white'}}
-                    btnText="Sign In with Provider"
-                    onPressFunc={() => {
-                      setUserRole(0);
-                      _signIn();
-                      // navigation.navigate('AddBusiness');
-                      // navigation.navigate('PrivateRoute', {screen: 'Parent'});
-                      setModalVisible(false); // Close the modal if open
-                      // SigninGoogle(userInfo);
-                    }}
-                  />
-
-                <BtnComp
-                  BtnStyle={styles.acceptStyle}
-                  btnTextStyle={{color: 'white'}}
-                  btnText="Sign In with Provider"
-                  onPressFunc={async () => {
-                    await setUserRole('0');
-                    console.log('UserRole set to 0:', userRole);
-                    // global.prrole = userRole;
-                    // console.log('globalproviderrole', global.prrole);
-                    await _signIn();
-                    SigninGoogle(userInfo, userRole);
-                    setModalVisible(false);
-                    _signOut();
-                  }}
-                />
-              </View>
-              <View style={styles.btnContainer}>
-                <BtnComp
-                  BtnStyle={styles.acceptStyle}
-                  btnTextStyle={{color:'white'}}
-                  btnText="Sign In As User"
-                  onPressFunc={() => {
-                    setModalVisible(false);
-                  navigation.navigate('PublicRoutes', { screen: 'AddBusiness' });
-                
-                  }}
-                />
-
-                <BtnComp
-                    BtnStyle={styles.acceptStyle}
-                    btnTextStyle={{color: 'white'}}
-                    btnText="Sign In with User"
-                    onPressFunc={() => {
-                      // Set userRole to '1' when the user clicks "Sign In with User"
-                      setUserRole(1);
-                      _signIn();
-                      //  navigation.navigate('PrivateRoute', {screen: 'Parent'});
-                      setModalVisible(false); // Close the modal if open
-                      //  SigninGoogle(userInfo);
-                    }}
-                  />
-
-                <BtnComp
-                  BtnStyle={styles.acceptStyle}
-                  btnTextStyle={{color: 'white'}}
-                  btnText="Sign In with User"
-                  onPressFunc={async () => {
-                    await setUserRole('1');
-                    console.log('UserRole set to 1:', userRole);
-                    // global.usrole = userRole;
-                    // console.log('globalproviderrole', global.prrole);
-                    await _signIn();
-                    setModalVisible(false);
-                    await SigninGoogle(userInfo, userRole);
-                    _signOut();
-                  }}
-                />
-              </View>
-            </View>
-          </View>
-        </View>
-      </Modal> */}
     </>
   );
 };
@@ -687,6 +148,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'column',
     width: '100%',
+    backgroundColor: 'white',
   },
   errorText: {
     color: 'red',
