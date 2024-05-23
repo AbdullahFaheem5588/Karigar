@@ -187,7 +187,8 @@ const Signup = props => {
         touched,
         isValid,
       }) => (
-        <ScrollView>
+        <ScrollView
+          style={{flex: 1, backgroundColor: color.default, height: '100%'}}>
           <View style={styles.container}>
             <Image
               source={require('../../Assets/icons/sign-up.png')}
@@ -277,7 +278,7 @@ const Signup = props => {
                 </Picker>
               </View>
               {roleError && (
-                <Text style={styles.errorText}>Please select a country.</Text>
+                <Text style={styles.errorText}>Please select a role.</Text>
               )}
             </View>
 
@@ -328,8 +329,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     flexDirection: 'column',
-    width: '90%',
+    width: '100%',
     paddingVertical: 20,
+    backgroundColor: 'white',
   },
   errorText: {
     color: 'red',
@@ -465,7 +467,7 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 6,
     marginTop: 6,
-    height: 57,
+    paddingVertical: 3,
     backgroundColor: 'white',
   },
   itemsStyle: {
@@ -483,7 +485,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   image: {
-    width: 200,
-    height: 200,
+    width: 130,
+    height: 130,
   },
 });

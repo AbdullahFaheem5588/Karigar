@@ -7,7 +7,7 @@ const color = {
   black: '#000',
   red: 'firebrick',
   darkRed: '#8B0000',
-  default: '#A020F0',
+  default: '#00A86B',
   btnColor: '#1C1A4B',
   purple: '#1c1a4b',
   bodyColor: '#f6f6f6',
