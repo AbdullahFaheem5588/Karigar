@@ -38,9 +38,8 @@ import {
 
 import Modal from 'react-native-modal';
 
-export const BASE_URL = 'https://theskilledman.com/api/';
-//export const BASE_URL='https://fisdemoprojects.com/skilledman/api/';
-
+export const BASE_URL = 'http://karigar.home.hinews.in/api/';
+import {setToken} from '../../Redux/Actions/tokenAction';
 const SignupValidationSchema = yup.object().shape({
   email: yup
     .string()
@@ -57,15 +56,12 @@ const SignupValidationSchema = yup.object().shape({
 });
 
 const Signin = props => {
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const initialValues = {
     email: '',
     password: '',
   };
 
-  // const { providersa } = useSelector(state => state.ProvidersReducer);
-  // console.log('🚀 ~ file: Main.js:9 ~ So ~ providersa:', providersa);
-  const {state, dispatch} = useAuth();
   const navigation = useNavigation();
   const [checked, setChecked] = React.useState(false);
   const [userName, setuserName] = React.useState('');
@@ -349,7 +345,7 @@ const Signin = props => {
   //   }
   // };
 
-  const SignInApi = (email, password) => {
+  const SignInApi = async (email, password) => {
     const formdata = new FormData();
     formdata.append('email', email);
     formdata.append('password', password);
@@ -360,9 +356,16 @@ const Signin = props => {
       redirect: 'follow',
     };
 
-    fetch('https://karigar.home.hinews.in/api/login', requestOptions)
+    await fetch('http://karigar.home.hinews.in/api/login', requestOptions)
       .then(response => response.json())
-      .then(response => console.log(response))
+      .then(({access_token, message}) => {
+        if (access_token) {
+          dispatch(setToken(access_token));
+          navigation.navigate('PrivateRoute', {screen: 'Parent'});
+        } else {
+          Alert.alert(JSON.stringify(message));
+        }
+      })
       .catch(error => console.error(error));
   };
   // const handleSignIn = async values => {

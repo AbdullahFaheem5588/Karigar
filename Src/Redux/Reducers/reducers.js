@@ -1,6 +1,6 @@
 import {SET_PROVIDERS} from '../Actions/actions';
 const initialState = {
-  providers: [],
+  providersa: [],
 };
 
 function ProvidersReducer(state = initialState, action) {

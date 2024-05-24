@@ -46,6 +46,14 @@ const SignupValidationSchema = yup.object().shape({
     .string()
     .required('Please Enter Your  Email')
     .matches(/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/, 'Please enter valid email'),
+  password: yup
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .required('Please Enter Your Password'),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password'), null], 'Passwords must match')
+    .required('Please Confirm Your Password'),
 });
 
 const Signup = props => {
@@ -67,38 +75,39 @@ const Signup = props => {
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
   };
 
-  useEffect(() => {
-    const fetchState = async () => {
-      try {
-        var myHeaders = new Headers();
-        myHeaders.append(
-          'Cookie',
-          'PHPSESSID=2a1286fffb4c2a53ccfdd18329031f71',
-        );
+  // useEffect(() => {
+  //   const fetchState = async () => {
+  //     try {
+  //       var myHeaders = new Headers();
+  //       myHeaders.append(
+  //         'Cookie',
+  //         'PHPSESSID=2a1286fffb4c2a53ccfdd18329031f71',
+  //       );
 
-        var formdata = new FormData();
+  //       var formdata = new FormData();
 
-        var requestOptions = {
-          method: 'GET',
-          headers: myHeaders,
-          body: formdata,
-          redirect: 'follow',
-        };
-        apiUrl =
-          'https://koboautos.com/shipafrika/member/ajaxfiles/state_code.php?id=3811';
+  //       var requestOptions = {
+  //         method: 'GET',
+  //         headers: myHeaders,
+  //         body: formdata,
+  //         redirect: 'follow',
+  //       };
+  //       apiUrl =
+  //         'https://koboautos.com/shipafrika/member/ajaxfiles/state_code.php?id=3811';
 
-        const response = await fetch(apiUrl, requestOptions);
-        const result = await response.json();
-        if (result) {
-        }
-      } catch (error) {
-        console.log('error', error);
-      }
-    };
-    fetchState();
-  }, []);
+  //       const response = await fetch(apiUrl, requestOptions);
+  //       const result = await response.json();
+  //       if (result) {
+  //       }
+  //     } catch (error) {
+  //       console.log('error', error);
+  //     }
+  //   };
+  //   fetchState();
+  // }, []);
 
   const onRoleChange = selectedRole => {
     setSelectedRole(selectedRole);
@@ -120,34 +129,23 @@ const Signup = props => {
       initialValues={initialValues}
       validationSchema={SignupValidationSchema}
       onSubmit={async value => {
-        // Handle form submission here
-        console.log('Form data submitted:', states);
-        console.log('Form data selectedStatesubmitted:', selectedState);
-        console.log('Form data selectedCountrysubmitted:', confirmPassword);
-        // navigation.navigate('OtpScreen');
+        console.log('🚀 ~ Signup ~ value:', value);
         try {
           setLoad(true);
-          var myHeaders = new Headers();
-
-          // if (selectedCountry == '' || selectedState == '') {
-          //   return;
-          // }
-          myHeaders.append('Cookie', 'PHPSESSID=repq4egpdnsd7ikh50kjova7jd');
 
           const formdata = new FormData();
-
+          formdata.append('username', value.name);
           formdata.append('name', value.name);
-          formdata.append('role', selectedRole);
+          formdata.append('type', selectedRole);
           formdata.append('email', value.email);
           formdata.append('password', value.password);
 
           // Define the API endpoint
           // const apiUrl ='https://fisdemoprojects.com/skilledman/api/otp_register.php';
-          const apiUrl = `${BASE_URL}otp_register.php`;
+          const apiUrl = `${BASE_URL}register`;
 
           var requestOptions = {
             method: 'POST',
-            headers: myHeaders,
             body: formdata,
             redirect: 'follow',
           };
@@ -155,23 +153,26 @@ const Signup = props => {
 
           const result = await response.json();
           console.log('API response:', result);
-          if (result) {
+          if (result && result.created_at) {
+            navigation.navigate('Signin');
+            Toast.showWithGravity('Account created', Toast.LONG, Toast.CENTER);
+
             setLoad(false);
-            global.id = result.id;
-            global.role = result.role;
-            global.name = result.name;
-            global.email = result.email;
-            global.password = result.password;
-            global.role = result.role;
-            if (!result.error) {
-              navigation.navigate('OtpScreen', {result});
-            } else if (result.error) {
-              Toast.showWithGravity(result.error, Toast.LONG, Toast.CENTER);
-            }
+            // global.id = result.id;
+            // global.role = result.role;
+            // global.name = result.name;
+            // global.email = result.email;
+            // global.password = result.password;
+            // global.role = result.role;
+            // if (!result.error) {
+            //   navigation.navigate('OtpScreen', {result});
+            // } else if (result.error) {
+            //   Toast.showWithGravity(result.error, Toast.LONG, Toast.CENTER);
+            // }
           } else {
             setLoad(false);
             // Handle the case where status is not true (e.g., show an error message)
-            console.error('API response indicates an error.');
+            Alert.alert(JSON.stringify(result));
           }
         } catch (error) {
           setLoad(false);
@@ -236,11 +237,12 @@ const Signup = props => {
               <C_TextInput
                 placeholder="Confirm Password"
                 placeholderTextColor={color.default}
-                onChangeText={setConfirmPassword}
-                value={confirmPassword}
+                onChangeText={handleChange('confirmPassword')}
+                onBlur={handleBlur('confirmPassword')}
+                value={values.confirmPassword}
               />
-              {touched.password && errors.password ? (
-                <Text style={styles.errorText}>{errors.password}</Text>
+              {touched.confirmPassword && errors.confirmPassword ? (
+                <Text style={styles.errorText}>{errors.confirmPassword}</Text>
               ) : null}
             </View>
 
@@ -292,11 +294,7 @@ const Signup = props => {
                 )
               }
               onPressFunc={() => {
-                if (values.password == confirmPassword) {
-                  handleSubmit(values);
-                  navigation.goBack();
-                } else
-                  ToastAndroid.show('Password Not Matched', ToastAndroid.SHORT);
+                handleSubmit(values);
               }}
               isValid={isValid}
             />

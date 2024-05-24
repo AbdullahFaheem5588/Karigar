@@ -1,5 +1,5 @@
 import {Picker} from '@react-native-picker/picker';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   useColorScheme,
   ALert,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 
 import color from '../../Assets/colors/colors';
@@ -28,11 +29,19 @@ import DocumentPicker from 'react-native-document-picker';
 import C_SkillInputs from '../../Components/C_SkillInput';
 import C_Dropdown from '../../Components/C_Dropdown';
 import Toast from 'react-native-simple-toast';
-import { BASE_URL } from '../Signin/Signin';
+import {BASE_URL} from '../Signin/Signin';
+import {useSelector} from 'react-redux';
 
 const AddSkill = props => {
+  const pickerRef = useRef();
+
   const navigation = useNavigation();
-  const [NumberofEXp, setNumberExp] = useState('');
+  const {token} = useSelector(state => state.TokenReducer);
+  console.log('🚀 ~ AddSkill ~ token:', token);
+  const {data} = useSelector(state => state.ProfileReducer);
+  console.log('🚀 ~ AddSkill ~ data:', data);
+
+  const [NumberofEXp, setDescription] = useState('');
   const [phonenumb, setPhoneNumb] = useState('');
   const [file, setFile] = useState('');
   const [item, setItem] = useState([]);
@@ -65,40 +74,45 @@ const AddSkill = props => {
   };
 
   const saveSkill = async () => {
-    if (NumberofEXp == '' || phonenumb == '') {
+    if (NumberofEXp == '') {
       Toast.show('please fill required field', Toast.LONG);
       return;
     }
     try {
       setLoad(true);
+      const myHeaders = new Headers();
+      myHeaders.append('Authorization', `Bearer ${token}`);
+
       var formdata = new FormData();
-      formdata.append('user_id', global.id);
-      formdata.append('service_name', selectedBusiness);
-      formdata.append('number_of_exp', NumberofEXp);
-      formdata.append('phone', phonenumb);
+
+      formdata.append('speciality', selectedBusiness);
+      formdata.append('description', NumberofEXp);
+
       {
-        file ? formdata.append('image', file) : null;
+        file ? formdata.append('icon', file) : null;
       }
 
       // const apiUrl ='https://fisdemoprojects.com/skilledman/api/add_skills.php';
-      const apiUrl =`${BASE_URL}add_skills.php`;
+      const apiUrl = `${BASE_URL}add_skilled`;
 
       var requestOptions = {
         method: 'POST',
         body: formdata,
+        headers: myHeaders,
         redirect: 'follow',
       };
       const response = await fetch(apiUrl, requestOptions);
       const result = await response.json();
 
-      if (result.status) {
-        setLoad(false);
-        Toast.show(result.status, Toast.LONG);
-        console.log('add skills', result.status);
-        navigation.navigate('DashBoard');
+      if (result) {
+        console.log(result);
+        // setLoad(false);
+        // Toast.show(result.status, Toast.LONG);
+        // console.log('add skills', result.status);
+        // navigation.navigate('DashBoard');
       } else if (result.error) {
         setLoad(false);
-        ALert.alert(error);
+        Alert.alert(error);
       }
     } catch (error) {
       setLoad(false);
@@ -108,32 +122,63 @@ const AddSkill = props => {
 
   useEffect(() => {
     const getOverall = async () => {
-      try {
-        var myHeaders = new Headers();
-        myHeaders.append('Cookie', 'PHPSESSID=0g4vvcrd3mg6h7pr1q0c26ns09');
+      const myHeaders = new Headers();
+      myHeaders.append('Authorization', `Bearer ${token}`);
 
-        var urlencoded = new URLSearchParams();
+      const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow',
+      };
+      fetch('http://karigar.home.hinews.in/api/get_skilled', requestOptions)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(result => {
+          if (result && result.skilled_providers) {
+            console.log('result add skill', result.skilled_providers);
+            if (result.skilled_providers.length > 0) {
+              let newArray = result.skilled_providers.map(item => {
+                return {
+                  key: item.id,
+                  value: `${item.speciality}`,
+                };
+              });
+              setItem(newArray);
+            }
+          } else if (result.error) {
+            Alert.alert(result.error);
+          }
+        })
+        .catch(error => console.error(error));
+      // try {
+      //   var myHeaders = new Headers();
+      //   myHeaders.append('Authorization', `Bearer ${token}`);
 
-        var requestOptions = {
-          method: 'POST',
-          headers: myHeaders,
-          body: urlencoded,
-          redirect: 'follow',
-        };
-        // const apiurl ='https://fisdemoprojects.com/skilledman/api/get_services.php';
-        const apiurl =`${BASE_URL}get_services.php`;
+      //   // var urlencoded = new URLSearchParams();
 
-        const response = await fetch(apiurl, requestOptions);
-        const result = await response.json();
-        if (result && result.add_skills) {
-          console.log('result add skill', result.add_skills);
-          setItem(result.add_skills);
-        } else if (result.error) {
-          ALert.alert(result.error);
-        }
-      } catch (error) {
-        console.log(error);
-      }
+      //   var requestOptions = {
+      //     method: 'Get',
+      //     headers: myHeaders,
+      //     // body: urlencoded,
+      //     redirect: 'follow',
+      //   };
+      //  const apiurl = `${BASE_URL}get_skilled`;
+
+      //   const response = await fetch(apiurl, requestOptions);
+      //   const result = await response.json();
+      //   if (result && result.add_skills) {
+      //     console.log('result add skill', result.add_skills);
+      //     setItem(result.add_skills);
+      //   } else if (result.error) {
+      //     ALert.alert(result.error);
+      //   }
+      // } catch (error) {
+      //   console.log(error);
+      // }
     };
 
     getOverall();
@@ -148,28 +193,62 @@ const AddSkill = props => {
       />
       <ScrollView>
         <View style={{padding: 20}}>
-          <C_Dropdown
-            selectedValue="Select Business"
-            options={item}
-            onValueChange={handleBusinessSelect}
-          />
-          <C_SkillInputs
-            style={{color: color.gray}}
-            // value={NumberofEXp}
-            placeholder="Number of Experience"
-            placeholderTextColor={color.gray}
-            onChangeText={text => setNumberExp(text)}
-            keyboardType={'numeric'}
-          />
+          {item.length > 0 ? (
+            <View style={styles.inputContainer}>
+              <View style={styles.DropDownContainer}>
+                <Picker
+                  ref={pickerRef}
+                  selectedValue={selectedBusiness}
+                  onValueChange={itemValue => handleBusinessSelect(itemValue)}
+                  enabled={true}
+                  mode={'dialog'}
+                  dropdownIconColor={color.default}
+                  selectionColor={color.yellow}
+                  itemStyle={styles.itemsStyle}>
+                  <Picker.Item
+                    label="Select Skill"
+                    value=""
+                    color={color.default}
+                    fontWeight="bold"
+                    fontSize={17}
+                  />
+                  {item.map((role, index) => (
+                    <Picker.Item
+                      key={role.key}
+                      label={role.value}
+                      value={role.value}
+                      color={color.default}
+                      style={{
+                        fontWeight: 'bold',
+                        fontSize: 17,
+                        backgroundColor: 'white',
+                      }}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.inputContainer}>
+              <Text
+                style={{
+                  fontWeight: 'bold',
+                  fontSize: 17,
+                  backgroundColor: color.default,
+                }}>
+                No Skill Found
+              </Text>
+            </View>
+          )}
 
           <C_SkillInputs
             style={{color: color.gray}}
-            // value={phonenumb}
-            placeholder="Phone Number"
+            // value={NumberofEXp}
+            placeholder="Description"
             placeholderTextColor={color.gray}
-            onChangeText={text => setPhoneNumb(text)}
-            keyboardType={'numeric'}
+            onChangeText={text => setDescription(text)}
           />
+
           <TouchableOpacity style={styles.addSkill} onPress={handleFilePick}>
             <Icons.Feather
               name="paperclip"
@@ -205,6 +284,23 @@ const styles = StyleSheet.create({
     color: color.white,
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  inputContainer: {
+    width: '100%',
+
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  DropDownContainer: {
+    borderColor: color.default,
+    borderWidth: 1,
+    paddingHorizontal: 5,
+    width: '100%',
+    borderRadius: 6,
+    marginTop: 6,
+    paddingVertical: 3,
+    backgroundColor: 'white',
   },
   loginBtn: {
     borderRadius: 5,
