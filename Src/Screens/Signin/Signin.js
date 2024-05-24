@@ -39,21 +39,6 @@ import {
 import Modal from 'react-native-modal';
 
 export const BASE_URL = 'http://karigar.home.hinews.in/api/';
-import {setToken} from '../../Redux/Actions/tokenAction';
-const SignupValidationSchema = yup.object().shape({
-  email: yup
-    .string()
-    .required('Please Enter Your  Email')
-    .matches(/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/, 'Please enter valid email'),
-  password: yup
-    .string()
-    .required('Password is required')
-    .min(6, 'Password must be at least 6 characters')
-    .matches(
-      /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$/,
-      'Password must contain at least one uppercase letter, one lowercase letter, and one digit',
-    ),
-});
 
 const Signin = props => {
   const dispatch = useDispatch();
@@ -63,7 +48,6 @@ const Signin = props => {
   };
 
   const navigation = useNavigation();
-  const [checked, setChecked] = React.useState(false);
   const [userName, setuserName] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [hide, setHide] = React.useState(true);
@@ -345,7 +329,7 @@ const Signin = props => {
   //   }
   // };
 
-  const SignInApi = async (email, password) => {
+  const SignInApi = (email, password) => {
     const formdata = new FormData();
     formdata.append('email', email);
     formdata.append('password', password);
@@ -356,7 +340,7 @@ const Signin = props => {
       redirect: 'follow',
     };
 
-    await fetch('http://karigar.home.hinews.in/api/login', requestOptions)
+    fetch('http://karigar.home.hinews.in/api/login', requestOptions)
       .then(response => response.json())
       .then(({access_token, message}) => {
         if (access_token) {
@@ -368,73 +352,7 @@ const Signin = props => {
       })
       .catch(error => console.error(error));
   };
-  // const handleSignIn = async values => {
-  //   const token = await getToken();
 
-  //   try {
-  //     setLoad(true);
-  //     var myHeaders = new Headers();
-
-  //     myHeaders.append('Cookie', 'PHPSESSID=repq4egpdnsd7ikh50kjova7jd');
-
-  //     const formdata = new FormData();
-  //     formdata.append('email', values.email);
-  //     formdata.append('password', values.password);
-  //     formdata.append('token', token);
-
-  //     // const apiUrl = 'https://fisdemoprojects.com/skilledman/api/login.php';
-  //     const apiUrl = `${BASE_URL}login.php`;
-
-  //     var requestOptions = {
-  //       method: 'POST',
-  //       headers: myHeaders,
-  //       body: formdata,
-  //       redirect: 'follow',
-  //     };
-  //     const response = await fetch(apiUrl, requestOptions);
-
-  //     const result = await response.json();
-  //     console.log('API response:', result);
-
-  //     if (result) {
-  //       setLoad(false);
-  //       await AsyncStorage.setItem('user', JSON.stringify(result));
-  //       await AsyncStorage.setItem('role', result.role);
-  //       dispatch({
-  //         type: 'LOGIN',
-  //         payload: {user: result, role: result.role},
-  //       });
-
-  //       global.email = result.email;
-  //       global.id = result.id;
-  //       global.name = result.name;
-  //       global.phone_number = result.phone_number;
-  //       global.address = result.address;
-  //       global.state = result.state;
-  //       global.whatsapp = result.whatsapp;
-  //       global.role = result.role;
-  //       global.working_experience = result.working_experience;
-  //       global.profile = result.profile;
-
-  //       if (result.role == 1 || result.role == 0) {
-  //         navigation.navigate('Parent');
-
-  //         if (GoogleSignin.isSignedIn()) {
-  //           // Call the function to open the modal
-  //           const states = global.states;
-  //           global.states == 0;
-  //         }
-  //       }
-  //     } else if (result.error) {
-  //       setLoad(false);
-  //       Toast.show('Email or Password does not match');
-  //       console.error('API response indicates an error.');
-  //     }
-  //   } catch (error) {
-  //     console.error('API error:', error);
-  //     Toast.show('Email or Password does not match');
-  //   }
-  // };
   const onPressSignInBtn = async () => {
     try {
       if (userName && password) {
