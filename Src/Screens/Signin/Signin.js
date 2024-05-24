@@ -39,7 +39,7 @@ import {
 import Modal from 'react-native-modal';
 
 export const BASE_URL = 'http://karigar.home.hinews.in/api/';
-
+import {setToken} from '../../Redux/Actions/tokenAction';
 const Signin = props => {
   const dispatch = useDispatch();
   const initialValues = {

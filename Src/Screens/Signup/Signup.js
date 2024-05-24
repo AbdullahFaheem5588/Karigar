@@ -1,21 +1,39 @@
-import React, {useState, useRef} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import React, {useState, useEffect, useRef} from 'react';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {
   StyleSheet,
   Text,
   View,
   Image,
+  ImageBackground,
   Dimensions,
   TouchableOpacity,
   ScrollView,
+  Switch,
+  Alert,
   ActivityIndicator,
   ToastAndroid,
 } from 'react-native';
 import C_TextInput from '../../Components/C_TextInput';
 import color from '../../Assets/colors/colors';
 import BtnComp from '../../Components/BtnComp';
-const {height, width} = Dimensions.get('window');
+import {Checkbox, TextInput} from 'react-native-paper';
+import CustomHeaderIcon from '../../Components/CustomHeaderIcon';
+import GoogleBtn from '../../Components/GoogelBtn';
+const {height} = Dimensions.get('window');
+const {width} = Dimensions.get('window');
+import {Formik} from 'formik';
+import * as yup from 'yup';
+import Toast from 'react-native-simple-toast';
+import {Country, State, City, getAllCountries} from 'country-state-city';
 import {Picker} from '@react-native-picker/picker';
+//import PhoneInput, {getCountryCallingCode} from 'react-native-phone-input';
+import PhoneInput from 'react-native-phone-input';
+import {_signInwithGoogle} from '../../utilis/firbase';
+import {GoogleSignin, GoogleSigninButton, statusCodes} from '';
+import Modal from 'react-native-modal';
+import Maplatln from './Maps';
+import C_TextInputno from '../../Components/C_TExtinputno';
 import {BASE_URL} from '../Signin/Signin';
 
 const SignupValidationSchema = yup.object().shape({
@@ -40,16 +58,22 @@ const SignupValidationSchema = yup.object().shape({
 
 const Signup = props => {
   const navigation = useNavigation();
-  const [load, setLoad] = useState(false);
+  const [load, setLoad] = React.useState(false);
   const roles = [
     {key: 1, value: 'user'},
     {key: 2, value: 'provider'},
   ];
   const [selectedRole, setSelectedRole] = useState('');
+  const [states, setStates] = useState([]);
+  const [roleError, setRoleError] = useState(false);
   const pickerRef = useRef();
-  const [userDetails, setUserDetails] = useState({
+
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const focus = useIsFocused();
+  const initialValues = {
     name: '',
-    username: '',
+    email: '',
     password: '',
     confirmPassword: '',
   };
@@ -87,8 +111,18 @@ const Signup = props => {
 
   const onRoleChange = selectedRole => {
     setSelectedRole(selectedRole);
-    setUserDetails({...userDetails, role: selectedRole});
+    // setCountryError(false);
   };
+
+  // async function googleSignIn() {
+  //   _signInwithGoogle().then(data => {
+  //     if (!data) {
+  //       console.log('=>Error:', 'No Data');
+  //       return;
+  //     }
+  //     console.log('=>Success', data);
+  //   });
+  // }
 
   return (
     <Formik
@@ -212,40 +246,43 @@ const Signup = props => {
               ) : null}
             </View>
 
-        <View style={styles.inputContainer}>
-          <View style={styles.DropDownContainer}>
-            <Picker
-              ref={pickerRef}
-              selectedValue={selectedRole}
-              onValueChange={itemValue => onRoleChange(itemValue)}
-              enabled={true}
-              mode={'dialog'}
-              dropdownIconColor={color.default}
-              selectionColor={color.yellow}
-              itemStyle={styles.itemsStyle}>
-              <Picker.Item
-                label="SignUp As"
-                value=""
-                color={color.default}
-                fontWeight="bold"
-                fontSize={17}
-              />
-              {roles.map((role, index) => (
-                <Picker.Item
-                  key={role.key}
-                  label={role.value}
-                  value={role.value}
-                  color={color.default}
-                  style={{
-                    fontWeight: 'bold',
-                    fontSize: 17,
-                    backgroundColor: 'white',
-                  }}
-                />
-              ))}
-            </Picker>
-          </View>
-        </View>
+            <View style={styles.inputContainer}>
+              <View style={styles.DropDownContainer}>
+                <Picker
+                  ref={pickerRef}
+                  selectedValue={selectedRole}
+                  onValueChange={itemValue => onRoleChange(itemValue)}
+                  enabled={true}
+                  mode={'dialog'}
+                  dropdownIconColor={color.default}
+                  selectionColor={color.yellow}
+                  itemStyle={styles.itemsStyle}>
+                  <Picker.Item
+                    label="SignUp As"
+                    value=""
+                    color={color.default}
+                    fontWeight="bold"
+                    fontSize={17}
+                  />
+                  {roles.map((role, index) => (
+                    <Picker.Item
+                      key={role.key}
+                      label={role.value}
+                      value={role.value}
+                      color={color.default}
+                      style={{
+                        fontWeight: 'bold',
+                        fontSize: 17,
+                        backgroundColor: 'white',
+                      }}
+                    />
+                  ))}
+                </Picker>
+              </View>
+              {roleError && (
+                <Text style={styles.errorText}>Please select a role.</Text>
+              )}
+            </View>
 
             <BtnComp
               BtnStyle={styles.BtnStyle}
@@ -281,6 +318,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 10,
   },
+
   textInput: {
     fontSize: 12,
   },
@@ -308,6 +346,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: '90%',
+
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 10,
@@ -324,6 +363,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderColor: color.default,
     borderWidth: 1,
+    // borderBottomColor: color.default,
     backgroundColor: 'transparent',
     borderRadius: 6,
   },
@@ -416,6 +456,8 @@ const styles = StyleSheet.create({
     width: '30%',
     textAlign: 'center',
   },
+
+  //
   DropDownContainer: {
     borderColor: color.default,
     borderWidth: 1,
