@@ -25,7 +25,7 @@ const {width} = Dimensions.get('window');
 import {Formik} from 'formik';
 import * as yup from 'yup';
 import Toast from 'react-native-simple-toast';
-import {Country, State, City, getAllCountries} from 'country-state-city';
+import Icon, {Icons} from '../../Components/Icons';
 import {Picker} from '@react-native-picker/picker';
 //import PhoneInput, {getCountryCallingCode} from 'react-native-phone-input';
 import PhoneInput from 'react-native-phone-input';
@@ -35,6 +35,7 @@ import Modal from 'react-native-modal';
 import Maplatln from './Maps';
 import C_TextInputno from '../../Components/C_TExtinputno';
 import {BASE_URL} from '../Signin/Signin';
+import DocumentPicker from 'react-native-document-picker';
 
 const SignupValidationSchema = yup.object().shape({
   name: yup
@@ -50,6 +51,10 @@ const SignupValidationSchema = yup.object().shape({
     .string()
     .min(8, 'Password must be at least 8 characters')
     .required('Please Enter Your Password'),
+  cnic: yup
+    .number()
+    .min(13, 'Enter 13 digit cnic number')
+    .required('Please Enter Your Cnic Number'),
   confirmPassword: yup
     .string()
     .oneOf([yup.ref('password'), null], 'Passwords must match')
@@ -63,12 +68,32 @@ const Signup = props => {
     {key: 1, value: 'user'},
     {key: 2, value: 'provider'},
   ];
+  const [file, setFile] = useState('');
+
   const [selectedRole, setSelectedRole] = useState('');
   const [states, setStates] = useState([]);
   const [roleError, setRoleError] = useState(false);
   const pickerRef = useRef();
 
   const [confirmPassword, setConfirmPassword] = useState('');
+  const handleFilePick = async () => {
+    try {
+      const result = await DocumentPicker.pick({
+        type: [DocumentPicker.types.allFiles],
+      });
+      console.log('File picker result', result[0]);
+      if (result) {
+        setFile(result[0]);
+      }
+    } catch (error) {
+      if (DocumentPicker.isCancel(error)) {
+        // User canceled the document picker
+      } else {
+        console.log('error occur on document picking', error);
+        throw error; // Throw the correct error
+      }
+    }
+  };
 
   const focus = useIsFocused();
   const initialValues = {
@@ -76,6 +101,7 @@ const Signup = props => {
     email: '',
     password: '',
     confirmPassword: '',
+    cnic: '',
   };
 
   // useEffect(() => {
@@ -111,7 +137,6 @@ const Signup = props => {
 
   const onRoleChange = selectedRole => {
     setSelectedRole(selectedRole);
-    // setCountryError(false);
   };
 
   // async function googleSignIn() {
@@ -220,7 +245,19 @@ const Signup = props => {
                 <Text style={styles.errorText}>{errors.email}</Text>
               ) : null}
             </View>
-
+            <View style={styles.inputContainer}>
+              <C_TextInput
+                placeholder="Cnic"
+                placeholderTextColor={color.default}
+                onChangeText={handleChange('cnic')}
+                onBlur={handleBlur('cnic')}
+                value={values.cnic}
+                keyboardType={'numeric'}
+              />
+              {touched.cnic && errors.cnic ? (
+                <Text style={styles.errorText}>{errors.cnic}</Text>
+              ) : null}
+            </View>
             <View style={styles.inputContainer}>
               <C_TextInput
                 placeholder="Password"
@@ -274,6 +311,9 @@ const Signup = props => {
                         fontWeight: 'bold',
                         fontSize: 17,
                         backgroundColor: 'white',
+                        borderRadius: 10,
+                        borderWidth: 1,
+                        borderColor: 'green',
                       }}
                     />
                   ))}
@@ -283,6 +323,19 @@ const Signup = props => {
                 <Text style={styles.errorText}>Please select a role.</Text>
               )}
             </View>
+            <TouchableOpacity style={styles.addSkill} onPress={handleFilePick}>
+              <Icons.Feather
+                name="paperclip"
+                size={25}
+                color={color.default}
+                style={styles.plusCont}
+              />
+              <Text style={styles.addMore}>
+                {file ? file?.name : 'Choose File'}
+              </Text>
+              {/* <Text style={[styles.addMore,
+            { color: 'red', marginLeft: 2 }]}>{JSON.stringify(file)}</Text> */}
+            </TouchableOpacity>
 
             <BtnComp
               BtnStyle={styles.BtnStyle}
@@ -318,7 +371,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 10,
   },
-
+  addSkill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
   textInput: {
     fontSize: 12,
   },
@@ -339,6 +396,15 @@ const styles = StyleSheet.create({
   backgroundImg: {
     width: '100%',
     height: '100%',
+  },
+  plusCont: {
+    color: color.default,
+    marginRight: 5,
+  },
+  addMore: {
+    fontWeight: '700',
+    color: color.gray,
+    fontSize: 15,
   },
   logoImg: {
     width: width / 2,

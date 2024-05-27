@@ -23,7 +23,8 @@ import HeaderWithSearchFilter from '../../Components/HeaderWithSearchFilter';
 import ServiceCard from '../../Components/ServiceCard';
 import BtnComp from '../../Components/BtnComp';
 import {useAuth} from '../../context/AuthProvider';
-import { BASE_URL } from '../Signin/Signin';
+import {BASE_URL} from '../Signin/Signin';
+import {useSelector} from 'react-redux';
 
 const {height} = Dimensions.get('window');
 const {width} = Dimensions.get('window');
@@ -74,6 +75,7 @@ const UserDashboard = () => {
   const [showAccount, setShowAccount] = useState(false); // Initially show the Account section
   const [modalTitle, setModalTitle] = useState('Filter');
   const [searchTerm, setsearchTerm] = useState('');
+  const {token} = useSelector(state => state.TokenReducer);
 
   const [skill, setskill] = useState([]); //
   const [selectedshowJob, setselectedShowJob] = useState('');
@@ -181,8 +183,7 @@ const UserDashboard = () => {
         redirect: 'follow',
       };
       // const apiurl ="https://fisdemoprojects.com/skilledman/api/user/providers_job.php"
-      const apiurl =`${BASE_URL}user/providers_job.php`
-
+      const apiurl = `${BASE_URL}user/providers_job.php`;
 
       const response = await fetch(apiurl, requestOptions);
       const result = await response.json();
@@ -212,25 +213,21 @@ const UserDashboard = () => {
     const getOverall = async () => {
       try {
         var myHeaders = new Headers();
-        myHeaders.append('Cookie', 'PHPSESSID=pqe6giac1t2jjjqkr6sh3r747i');
-
-        var urlencoded = new URLSearchParams();
+        myHeaders.append('Authorization', `Bearer ${token}`);
 
         var requestOptions = {
-          method: 'POST',
+          method: 'GET',
           headers: myHeaders,
-          body: urlencoded,
           redirect: 'follow',
         };
         // const apiurl ='https://fisdemoprojects.com/skilledman/api/get_services.php';
-        const apiurl =`${BASE_URL}get_services.php`;
-
+        const apiurl = `${BASE_URL}get/services`;
 
         const response = await fetch(apiurl, requestOptions);
         const result = await response.json();
-        if (result && result.add_skills) {
-          console.log('result services', result.add_skills);
-          setskill(result.add_skills);
+        if (result && result.Service) {
+          console.log('result services', result.Service);
+          setskill(result.Service);
         } else if (result.error) {
           Alert.alert(result.error);
         }
@@ -242,7 +239,7 @@ const UserDashboard = () => {
   }, []);
 
   const filteredData = skill.filter(item =>
-    item.select_bussiness.toLowerCase().includes(searchTerm.toLowerCase()),
+    item.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
   console.log(filteredData, 'filteredData');
 
@@ -286,14 +283,12 @@ const UserDashboard = () => {
             <ServiceCard
               key={ind}
               showProfile={() => {
-                Fetchspecficdata(itemdata.select_bussiness);
+                Fetchspecficdata(itemdata.title);
               }}
-              serviceTitle={itemdata.select_bussiness}
+              serviceTitle={itemdata.title}
               // iconUrl={require('../../Assets/icons/Mechanics.png')}
               // iconUrl={`https://fisdemoprojects.com/skilledman/api/uploads//${itemdata.image}`}
-              iconUrl={`${BASE_URL}uploads//${itemdata.image}`}
-
-
+              iconUrl={`${BASE_URL}uploads//${itemdata.icon}`}
             />
           ))}
         </View>

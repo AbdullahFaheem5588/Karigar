@@ -5,15 +5,10 @@ import Icon, {Icons} from '../Components/Icons';
 import * as Animatable from 'react-native-animatable';
 import color from '../Assets/colors/colors';
 import LinearGradient from 'react-native-linear-gradient';
-import MyWork from '../Screens/MyWork/MyWork';
-import RequestScreen from '../Screens/Request/Request';
 import ChatScreen from '../Screens/Chat/ChatScreen';
 import UserDashboard from '../Screens/DashBoard/UserDashboard';
 import BookingScreen from '../Screens/Booking/BookingScreen';
 import SaveScreen from '../Screens/Save/SaveScreen';
-import Socketdemo from '../Screens/Chat/socketiodemo';
-import {Badge} from 'react-native-paper';
-import ConversationScreen from '../utilis/Firebasechat';
 const TabArr = [
   // {
   //   route: 'ConversationScreen',

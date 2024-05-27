@@ -8,7 +8,6 @@ import {useAuth} from '../context/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 
-
 import {
   GoogleSignin,
   statusCodes,
@@ -97,12 +96,11 @@ const CustomDrawer = () => {
           drawerIcon="sign-out"
           DrawerBtnPress={() => {
             logOut();
-           // _signOut();
-          // handleSignOut();
+            // _signOut();
+            // handleSignOut();
           }}
         />
       </View>
-      
     </LinearGradient>
   );
 };
@@ -126,13 +124,12 @@ const styles = StyleSheet.create({
     width: '100%',
     marginVertical: 10,
   },
- logoutStyle: {
-  position: 'absolute',
-  bottom: '2%', // Adjust this value as needed
-  left: '5%', // Adjust this value as needed
-  width: '90%', // Adjust this value as needed
-  borderTopWidth: 0.4,
-  borderTopColor: color.white,
-}
-
+  logoutStyle: {
+    position: 'absolute',
+    bottom: '2%', // Adjust this value as needed
+    left: '5%', // Adjust this value as needed
+    width: '90%', // Adjust this value as needed
+    borderTopWidth: 0.4,
+    borderTopColor: color.white,
+  },
 });

@@ -27,7 +27,9 @@ import PublicRoutes from './PublicRoutes';
 import {MyForm} from '../Components/MyForm';
 import Socketdemo from '../Screens/Chat/socketiodemo';
 import ConversationScreen from '../utilis/Firebasechat';
-
+import SellerDashBoard from '../Screens/DashBoard/sellerDashboard';
+import AddProducts from '../Screens/Drawer/addproducts';
+import ShowProviderDetails from '../Screens/Drawer/ShowProviderDetail';
 const Stack = createNativeStackNavigator();
 
 const PrivateRoute = () => {
@@ -37,12 +39,22 @@ const PrivateRoute = () => {
         name="Parent"
         component={Parent}
         options={{headerShown: false}}
-      /> 
+      />
+      <Stack.Screen
+        name="addProducts"
+        component={AddProducts}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="providerDetail"
+        component={ShowProviderDetails}
+        options={{headerShown: false}}
+      />
       <Stack.Screen
         name="ConversationScreen"
         component={ConversationScreen}
         options={{headerShown: false}}
-      /> 
+      />
       <Stack.Screen
         name="Socketdemo"
         component={Socketdemo}

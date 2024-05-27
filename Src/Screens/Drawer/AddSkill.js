@@ -130,7 +130,7 @@ const AddSkill = props => {
         headers: myHeaders,
         redirect: 'follow',
       };
-      fetch('http://karigar.home.hinews.in/api/get_skilled', requestOptions)
+      fetch(`${BASE_URL}services-dropdown`, requestOptions)
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -138,13 +138,13 @@ const AddSkill = props => {
           return response.json();
         })
         .then(result => {
-          if (result && result.skilled_providers) {
-            console.log('result add skill', result.skilled_providers);
-            if (result.skilled_providers.length > 0) {
-              let newArray = result.skilled_providers.map(item => {
+          if (result && result.services) {
+            console.log('result add skill', result.services);
+            if (result.services.length > 0) {
+              let newArray = result.services.map(item => {
                 return {
                   key: item.id,
-                  value: `${item.speciality}`,
+                  value: `${item.title}`,
                 };
               });
               setItem(newArray);

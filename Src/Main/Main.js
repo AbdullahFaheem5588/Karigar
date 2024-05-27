@@ -8,11 +8,15 @@ import {useIsFocused} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {BASE_URL} from '../Screens/Signin/Signin';
 import {setProfile} from '../Redux/Actions/profileAction';
+import SellerTabs from '../BottomNavigator/SellerTabs';
+import AdminTabs from '../BottomNavigator/AdminTabs';
 const Main = ({navigation}) => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
-  const [value, setValue] = useState('0');
+  const [value, setValue] = useState('admin');
   const {token} = useSelector(state => state.TokenReducer);
+  const {data} = useSelector(state => state.ProfileReducer);
+
   const getProfileData = () => {
     const myHeaders = new Headers();
     myHeaders.append('Authorization', `Bearer ${token}`);
@@ -69,10 +73,14 @@ const Main = ({navigation}) => {
 
   return (
     <View style={{flex: 1}}>
-      {value && value === '1' ? (
+      {value && value === 'user' ? (
         <UserTabs />
-      ) : value && value === '0' ? (
+      ) : value && value === 'provider' ? (
         <ProviderTabs />
+      ) : value && value === 'seller' ? (
+        <SellerTabs />
+      ) : value && value === 'admin' ? (
+        <AdminTabs />
       ) : null}
     </View>
   );
