@@ -8,7 +8,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import ChatScreen from '../Screens/Chat/ChatScreen';
 import UserDashboard from '../Screens/DashBoard/UserDashboard';
 import BookingScreen from '../Screens/Booking/BookingScreen';
-import SaveScreen from '../Screens/Save/SaveScreen';
+import ProductsScreen from '../Screens/Save/SaveScreen';
 const TabArr = [
   // {
   //   route: 'ConversationScreen',
@@ -38,11 +38,11 @@ const TabArr = [
     alphaClr: color.white,
   },
   {
-    route: 'SaveScreen',
-    label: 'Save',
+    route: 'ProductsScreen',
+    label: 'Products',
     type: Icons.FontAwesome,
-    icon: 'bookmark',
-    component: SaveScreen,
+    icon: 'shopping-cart',
+    component: ProductsScreen,
     color: color.darkgreen,
     alphaClr: color.white,
   },

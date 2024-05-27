@@ -13,7 +13,7 @@ import AdminTabs from '../BottomNavigator/AdminTabs';
 const Main = ({navigation}) => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
-  const [value, setValue] = useState('admin');
+  const [value, setValue] = useState('user');
   const {token} = useSelector(state => state.TokenReducer);
   const {data} = useSelector(state => state.ProfileReducer);
 
