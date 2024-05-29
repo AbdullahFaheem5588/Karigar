@@ -1,26 +1,21 @@
-import { View, Text } from 'react-native';
-import React, { useEffect } from 'react';
-import { Provider as PaperProvider } from 'react-native-paper';
+import {View, Text} from 'react-native';
+import React, {useEffect} from 'react';
+import {Provider as PaperProvider} from 'react-native-paper';
 import MainNavigationHub from './Src/MainNavigation/MainNavigationHub';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Provider } from 'react-redux';
-import { Store } from './Src/Redux/Store/store';
-import { requestUserPermission, notificationListener } from './Src/utilis/notification';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {Provider} from 'react-redux';
+import {Store} from './Src/Redux/Store/store';
+import {
+  requestUserPermission,
+  notificationListener,
+} from './Src/utilis/notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthProvider } from './Src/context/AuthProvider';
-
+import {AuthProvider} from './Src/context/AuthProvider';
 
 const App = () => {
-
-  useEffect(() => {
-    requestUserPermission()
-    notificationListener("bookservice")
-
-    AsyncStorage.removeItem("fcmtoken")
-  }, [])
   return (
     <Provider store={Store}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={{flex: 1}}>
         <PaperProvider>
           <AuthProvider>
             <MainNavigationHub />
@@ -49,8 +44,6 @@ export default App;
 //   const [fooEvents, setFooEvents] = useState([]);
 //   const [value, setValue] = useState('');
 //   const [isLoading, setIsLoading] = useState(false);
-
-
 
 //   const onSubmit = () => {
 //     setIsLoading(true);
@@ -119,7 +112,7 @@ export default App;
 //         <Text style={{ color: 'white' }}>Submit</Text>
 //       </TouchableOpacity>
 //     </View>
-       
+
 //     </View>
 //   );
 // }

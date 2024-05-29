@@ -23,7 +23,7 @@ import HeaderWithSearchFilter from '../../Components/HeaderWithSearchFilter';
 import ServiceCard from '../../Components/ServiceCard';
 import BtnComp from '../../Components/BtnComp';
 import {useAuth} from '../../context/AuthProvider';
-import {BASE_URL} from '../Signin/Signin';
+import {BASE_URL, Img_URL} from '../Signin/Signin';
 import {useSelector} from 'react-redux';
 
 const {height} = Dimensions.get('window');
@@ -182,7 +182,6 @@ const UserDashboard = () => {
         body: formdata,
         redirect: 'follow',
       };
-      // const apiurl ="https://fisdemoprojects.com/skilledman/api/user/providers_job.php"
       const apiurl = `${BASE_URL}user/providers_job.php`;
 
       const response = await fetch(apiurl, requestOptions);
@@ -288,7 +287,7 @@ const UserDashboard = () => {
               serviceTitle={itemdata.title}
               // iconUrl={require('../../Assets/icons/Mechanics.png')}
               // iconUrl={`https://fisdemoprojects.com/skilledman/api/uploads//${itemdata.image}`}
-              iconUrl={`${BASE_URL}uploads//${itemdata.icon}`}
+              iconUrl={`${Img_URL}${itemdata.icon}`}
             />
           ))}
         </View>

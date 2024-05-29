@@ -13,7 +13,7 @@ import AdminTabs from '../BottomNavigator/AdminTabs';
 const Main = ({navigation}) => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
-  const [value, setValue] = useState('user');
+  const [value, setValue] = useState('provider');
   const {token} = useSelector(state => state.TokenReducer);
   const {data} = useSelector(state => state.ProfileReducer);
 
@@ -73,13 +73,13 @@ const Main = ({navigation}) => {
 
   return (
     <View style={{flex: 1}}>
-      {value && value === 'user' ? (
+      {data && data?.type === 'user' ? (
         <UserTabs />
-      ) : value && value === 'provider' ? (
+      ) : data && data?.type === 'provider' ? (
         <ProviderTabs />
-      ) : value && value === 'seller' ? (
+      ) : data && data?.type === 'seller' ? (
         <SellerTabs />
-      ) : value && value === 'admin' ? (
+      ) : data && data?.type === 'admin' ? (
         <AdminTabs />
       ) : null}
     </View>

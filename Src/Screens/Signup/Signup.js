@@ -51,10 +51,7 @@ const SignupValidationSchema = yup.object().shape({
     .string()
     .min(8, 'Password must be at least 8 characters')
     .required('Please Enter Your Password'),
-  cnic: yup
-    .number()
-    .min(13, 'Enter 13 digit cnic number')
-    .required('Please Enter Your Cnic Number'),
+
   confirmPassword: yup
     .string()
     .oneOf([yup.ref('password'), null], 'Passwords must match')
@@ -67,8 +64,10 @@ const Signup = props => {
   const roles = [
     {key: 1, value: 'user'},
     {key: 2, value: 'provider'},
+    {key: 2, value: 'seller'},
   ];
   const [file, setFile] = useState('');
+  const [document, setDocument] = useState('');
 
   const [selectedRole, setSelectedRole] = useState('');
   const [states, setStates] = useState([]);
@@ -94,14 +93,30 @@ const Signup = props => {
       }
     }
   };
-
+  const handleDocumentPick = async () => {
+    try {
+      const result = await DocumentPicker.pick({
+        type: [DocumentPicker.types.allFiles],
+      });
+      console.log('File picker document', result[0]);
+      if (result) {
+        setDocument(result[0]);
+      }
+    } catch (error) {
+      if (DocumentPicker.isCancel(error)) {
+        // User canceled the document picker
+      } else {
+        console.log('error occur on document picking', error);
+        throw error; // Throw the correct error
+      }
+    }
+  };
   const focus = useIsFocused();
   const initialValues = {
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    cnic: '',
   };
 
   // useEffect(() => {
@@ -164,7 +179,12 @@ const Signup = props => {
           formdata.append('type', selectedRole);
           formdata.append('email', value.email);
           formdata.append('password', value.password);
-
+          {
+            file ? formdata.append('image', file) : null;
+          }
+          {
+            document ? formdata.append('document', document) : null;
+          }
           // Define the API endpoint
           // const apiUrl ='https://fisdemoprojects.com/skilledman/api/otp_register.php';
           const apiUrl = `${BASE_URL}register`;
@@ -245,7 +265,7 @@ const Signup = props => {
                 <Text style={styles.errorText}>{errors.email}</Text>
               ) : null}
             </View>
-            <View style={styles.inputContainer}>
+            {/* <View style={styles.inputContainer}>
               <C_TextInput
                 placeholder="Cnic"
                 placeholderTextColor={color.default}
@@ -257,7 +277,7 @@ const Signup = props => {
               {touched.cnic && errors.cnic ? (
                 <Text style={styles.errorText}>{errors.cnic}</Text>
               ) : null}
-            </View>
+            </View> */}
             <View style={styles.inputContainer}>
               <C_TextInput
                 placeholder="Password"
@@ -331,7 +351,22 @@ const Signup = props => {
                 style={styles.plusCont}
               />
               <Text style={styles.addMore}>
-                {file ? file?.name : 'Choose File'}
+                {file ? file?.name : 'Choose Cnic File'}
+              </Text>
+              {/* <Text style={[styles.addMore,
+            { color: 'red', marginLeft: 2 }]}>{JSON.stringify(file)}</Text> */}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.addSkill}
+              onPress={handleDocumentPick}>
+              <Icons.Feather
+                name="paperclip"
+                size={25}
+                color={color.default}
+                style={styles.plusCont}
+              />
+              <Text style={styles.addMore}>
+                {document ? document?.name : 'Choose Document'}
               </Text>
               {/* <Text style={[styles.addMore,
             { color: 'red', marginLeft: 2 }]}>{JSON.stringify(file)}</Text> */}

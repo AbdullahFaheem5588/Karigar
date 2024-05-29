@@ -13,32 +13,19 @@ import color from '../Assets/colors/colors';
 import {Badge} from 'react-native-paper';
 const {height} = Dimensions.get('window');
 const {width} = Dimensions.get('window');
-import { BASE_URL } from '../Screens/Signin/Signin';
+import {BASE_URL} from '../Screens/Signin/Signin';
 
 const ProfileCard = props => {
-  // const imageurl = `https://fisdemoprojects.com/skilledman/api/uploads//${props.profile}`;
-  const imageurl = `${BASE_URL}uploads//${props.profile}`;
-
   return (
     <TouchableOpacity
       onPress={props.showProfile}
       style={[styles.textContainer, {...props.cardStyle}]}>
-      <Image
-        style={styles.logoImg}
-        resizeMode="contain"
-        source={{uri: imageurl}}
-      />
       <View style={styles.profileCont}>
         <View style={[styles.openingStyle, {...styles.titleCont}]}>
           <Text style={styles.TextStyle}>{props.cardTitle}</Text>
         </View>
         <View style={styles.openingStyle}>
           <Text style={styles.msgTitle}>{props.msgTitle}</Text>
-          {props.noOfMsg > 0 ? (
-            <Badge style={styles.noOfMsg} size={23}>
-              {props.noOfMsg}
-            </Badge>
-          ) : null}
         </View>
         <Text style={styles.dateStyle}>{props.time}</Text>
       </View>

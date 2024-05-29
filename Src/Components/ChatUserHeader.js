@@ -6,7 +6,7 @@ import {Image} from 'native-base';
 import {Icons} from './Icons';
 import {Modal} from 'react-native-paper';
 import BtnComp from './BtnComp';
-import { BASE_URL } from '../Screens/Signin/Signin';
+import {BASE_URL} from '../Screens/Signin/Signin';
 const ChatUserHeader = (props, {onShowModal}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -33,7 +33,6 @@ const ChatUserHeader = (props, {onShowModal}) => {
               source={{
                 // uri: `https://fisdemoprojects.com/skilledman/api/uploads//${props.recieverdata.image}`,
                 uri: `${BASE_URL}uploads//${props.recieverdata.image}`,
-
               }}
               alt="user"
             />
@@ -53,20 +52,11 @@ const ChatUserHeader = (props, {onShowModal}) => {
           </TouchableOpacity> */}
 
         <Modal
-          style={{height: 230,alignItems:'center',justifyContent:'center'}}
+          style={{height: 230, alignItems: 'center', justifyContent: 'center'}}
           transparent={true}
           visible={modalVisible}
           onRequestClose={() => toggleModal()}>
           <View style={styles.modalContainer}>
-            <Image
-              style={{width: 220, height: 120}} // Adjust the size as needed
-              source={{
-                // uri: `https://fisdemoprojects.com/skilledman/api/uploads//${props.recieverdata.image}`,
-                uri: `${BASE_URL}uploads//${props.recieverdata.image}`,
-
-              }}
-              alt="user"
-            />
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => toggleModal()}>

@@ -68,6 +68,7 @@ const AddSkill = props => {
   };
 
   const handleBusinessSelect = selectedValue => {
+    console.log('🚀 ~ handleBusinessSelect ~ selectedValue:', selectedValue);
     // You can do something with the selected value here, like set it in the state or use it in an API call.
     // console.log("Selected Business:", selectedValue);
     setSelectedBusiness(selectedValue);
@@ -85,12 +86,12 @@ const AddSkill = props => {
 
       var formdata = new FormData();
 
-      formdata.append('speciality', selectedBusiness);
+      formdata.append('service_id', selectedBusiness);
       formdata.append('description', NumberofEXp);
 
-      {
-        file ? formdata.append('icon', file) : null;
-      }
+      // {
+      //   file ? formdata.append('icon', file) : null;
+      // }
 
       // const apiUrl ='https://fisdemoprojects.com/skilledman/api/add_skills.php';
       const apiUrl = `${BASE_URL}add_skilled`;
@@ -138,6 +139,8 @@ const AddSkill = props => {
           return response.json();
         })
         .then(result => {
+          console.log('🚀 ~ getOverall ~ result:', result);
+
           if (result && result.services) {
             console.log('result add skill', result.services);
             if (result.services.length > 0) {
