@@ -165,32 +165,30 @@ const UserDashboard = () => {
   };
 
   // api
-  const Fetchspecficdata = async value => {
-    console.log('value to fetch', value);
+  const Fetchspecficdata = async (id, title) => {
+    console.log('value to fetch', id);
 
     try {
-      var myHeaders = new Headers();
-      myHeaders.append('Cookie', 'PHPSESSID=lccmaap9lnt4db1mjf1247d3md');
+      const myHeaders = new Headers();
 
-      var formdata = new FormData();
-      formdata.append('job', value);
-      formdata.append('user_id', global.id);
+      myHeaders.append('Authorization', `Bearer ${token}`);
 
-      var requestOptions = {
-        method: 'POST',
+      const requestOptions = {
+        method: 'GET',
         headers: myHeaders,
-        body: formdata,
         redirect: 'follow',
       };
-      const apiurl = `${BASE_URL}user/providers_job.php`;
+      const apiurl = `${BASE_URL}get_skilled/${id}`;
 
       const response = await fetch(apiurl, requestOptions);
       const result = await response.json();
       console.log('result of expert ', result);
 
-      if (result && result.add_skills) {
-        console.log(`result of ${value}`, result);
-        navigation.navigate('FindExpert', {data: result.add_skills});
+      if (result) {
+        console.log(`result of ${id}`, result);
+        if (result.skilled_providers.length > 0)
+          navigation.navigate('FindExpert', {data: result.skilled_providers});
+        else ToastAndroid.show('No ' + title + ' Found!', ToastAndroid.SHORT);
       } else if (result.error) {
         Alert.alert(result.error);
       }
@@ -282,7 +280,7 @@ const UserDashboard = () => {
             <ServiceCard
               key={ind}
               showProfile={() => {
-                Fetchspecficdata(itemdata.title);
+                Fetchspecficdata(itemdata.id, itemdata.title);
               }}
               serviceTitle={itemdata.title}
               // iconUrl={require('../../Assets/icons/Mechanics.png')}

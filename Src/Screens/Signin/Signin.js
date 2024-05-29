@@ -50,8 +50,8 @@ const Signin = props => {
   };
 
   const navigation = useNavigation();
-  const [userName, setuserName] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [userName, setuserName] = React.useState('abdullah@gmail.com');
+  const [password, setPassword] = React.useState('12345678');
   const [hide, setHide] = React.useState(true);
   const [load, setLoad] = React.useState(false);
   const [isSwitchOn, setIsEnabled] = useState(false);

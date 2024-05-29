@@ -28,7 +28,7 @@ import StarRating from 'react-native-star-rating';
 const {height} = Dimensions.get('window');
 const {width} = Dimensions.get('window');
 import Toast from 'react-native-simple-toast';
-import { BASE_URL } from '../Signin/Signin';
+import {BASE_URL} from '../Signin/Signin';
 
 const ExpertDetail = props => {
   const navigation = useNavigation();
@@ -171,7 +171,7 @@ const ExpertDetail = props => {
         redirect: 'follow',
       };
       // const apiurl ='https://fisdemoprojects.com/skilledman/api/user/book_service.php';
-      const apiurl =`${BASE_URL}user/book_service.php`;
+      const apiurl = `${BASE_URL}user/book_service.php`;
 
       const response = await fetch(apiurl, requestOptions);
       const result = await response.json();
@@ -224,7 +224,6 @@ const ExpertDetail = props => {
               source={{
                 // uri: `https://fisdemoprojects.com/skilledman/api/uploads//${item.profile}`,
                 uri: `${BASE_URL}uploads//${item.profile}`,
-
               }}
             />
           ) : (
@@ -234,7 +233,6 @@ const ExpertDetail = props => {
               source={{
                 // uri: `https://fisdemoprojects.com/skilledman/api/uploads//dumy.png`,
                 uri: `${BASE_URL}uploads//dumy.png`,
-
               }}
             />
           )}
@@ -258,7 +256,7 @@ const ExpertDetail = props => {
 
   return (
     <SafeAreaView>
-      <Modal
+      {/* <Modal
         animationType="slide"
         transparent={false}
         visible={submitReviewVisible}
@@ -365,7 +363,7 @@ const ExpertDetail = props => {
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
       <Modal
         contentContainerStyle={{
           justifyContent: 'center',
@@ -581,52 +579,27 @@ const ExpertDetail = props => {
       <ScrollView
         style={{paddingHorizontal: 20, paddingBottom: 0, maxHeight: '90%'}}>
         <View>
-          <View style={styles.imgCont}></View>
           <Image
             style={styles.expertImg}
             resizeMode="contain"
-            source={{
-              // uri: `https://fisdemoprojects.com/skilledman/api/uploads//${item?.image}`,
-              uri: `${BASE_URL}uploads//${item?.image}`,
-
-            }}
+            source={
+              item.icon
+                ? {uri: data.icon}
+                : require('../../Assets/icons/defaultProfileIcon.png')
+            }
           />
-          <Text style={styles.expertTitle}>Expert {item?.service_name}</Text>
+          <Text style={styles.expertTitle}>Expert {item?.service.title}</Text>
         </View>
 
-        <View style={styles.contentStyle}>
-          <View style={styles.displayFlex}>
-            <Text style={styles.nameStyle}>{item?.name}</Text>
-            {item?.verified == 'Verified' ? (
-              <Icons.FontAwesome5
-                name={'user-check'}
-                color={color.blue}
-                size={16}
-              />
-            ) : null}
-          </View>
-
-          <Icons.FontAwesome name="bookmark" color={color.default} size={15} />
-        </View>
-
-        <View style={styles.contentStyle}>
-          <View style={styles.displayFlex}>
-            <Icons.MaterialIcons
-              name="location-on"
-              color={color.default}
-              size={20}
+        <View style={styles.displayFlex}>
+          <Text style={styles.nameStyle}>{item?.user.name}</Text>
+          {item.user.verified == 1 ? (
+            <Icons.FontAwesome5
+              name={'user-check'}
+              color={color.blue}
+              size={16}
             />
-            <Text style={styles.expStyle}>{item?.Address}</Text>
-          </View>
-          <Text style={styles.disStyle}>{item?.distance} Km away</Text>
-        </View>
-
-        <View style={styles.contentStyle}>
-          <View style={styles.displayFlex}>
-            <Icons.FontAwesome name="phone" color={color.default} size={20} />
-            <Text style={styles.expStyle}>{item?.phone_number}</Text>
-          </View>
-          <Text style={styles.expStyle}>( {item?.experience} years Exp )</Text>
+          ) : null}
         </View>
 
         <View style={styles.ratingCont}>
@@ -634,9 +607,8 @@ const ExpertDetail = props => {
             <Text style={styles.ratTitle}>Rating</Text>
             <View style={styles.displayFlex}>
               <Icons.FontAwesome name="star" color={color.yellow} size={15} />
-              <Text style={styles.totRat}>
-                {item?.averageRating.toFixed(2)}
-              </Text>
+              <Icons.FontAwesome name="star" color={color.yellow} size={15} />
+              <Icons.FontAwesome name="star" color={color.yellow} size={15} />
             </View>
           </View>
           <View
@@ -651,67 +623,17 @@ const ExpertDetail = props => {
                 zIndex: -10,
               },
             ]}>
-            <Text style={styles.ratTitle}>Total Jobs</Text>
-            <Text style={[styles.totRat, {paddingRight: '13 %'}]}>
-              {item?.totaljob}
-            </Text>
+            <Text style={styles.ratTitle}>Experience</Text>
+            <Text style={styles.totRat}>{item?.description}</Text>
           </View>
-        </View>
-
-        <View style={styles.contentStyle}>
-          <Text style={styles.serInc}>Services Include</Text>
-          <View style={styles.displayFlex}>
-            <Text style={styles.licenseStyle}>License </Text>
-            <Icons.FontAwesome
-              name="file-text"
-              color={color.default}
-              size={20}
-            />
-          </View>
-        </View>
-
-        <View style={styles.listCont}>
-          <FlatList
-            data={item?.skills}
-            renderItem={({item, index}) => (
-              <ServicesList
-                index={index}
-                item={item}
-                keyExtractor={({item, index}) => `service_${index}`}
-              />
-            )}
-          />
-        </View>
-        <View style={styles.reviewCont}>
-          <View style={styles.contentStyle}>
-            <Text style={styles.serInc}>
-              {item?.people_review.length} Reviews
-            </Text>
-            <TouchableOpacity>
-              <Text style={[styles.licenseStyle, {fontWeight: '400'}]}>
-                See All
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <FlatList
-            horizontal={true}
-            data={item?.people_review}
-            renderItem={({item, index}) => (
-              <ReviewsList
-                item={item}
-                index={index}
-                keyExtractor={({item, index}) => `expert_${index}`}
-              />
-            )}
-          />
         </View>
         <View style={styles.btnContainer}>
           <BtnComp
-            onPressFunc={() =>
-              navigation.navigate('IndividualChat', {currentuser: item})
-             //  navigation.navigate('ConversationScreen', {currentuser: item})
-            }
-            btnText="Inbox"
+            // onPressFunc={
+            //   () => navigation.navigate('IndividualChat', {currentuser: item})
+            //   //  navigation.navigate('ConversationScreen', {currentuser: item})
+            // }
+            btnText="Chat"
             BtnStyle={styles.BtnStyle}
           />
           <BtnComp
@@ -797,25 +719,22 @@ const styles = StyleSheet.create({
   },
   expertImg: {
     width: '100%',
-    height: height / 3,
+    height: height / 3.5,
+    marginTop: 20,
   },
   imgCont: {
     position: 'absolute',
     width: '100%',
-    height: height / 3.43,
+    height: height / 3,
     elevation: 1,
     backgroundColor: color.default,
     zIndex: 900,
     opacity: 0.3,
-    top: 19,
   },
   expertTitle: {
-    position: 'absolute',
-    bottom: '11%',
-    left: '5%',
     fontWeight: 'bold',
     fontSize: 20,
-    color: color.white,
+    color: color.black,
     zIndex: 9000,
   },
   contentStyle: {
@@ -855,7 +774,9 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   ratContent: {
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 30,
   },
   ratTitle: {
     fontSize: 18,
@@ -863,10 +784,8 @@ const styles = StyleSheet.create({
     paddingBottom: 7,
   },
   totRat: {
-    fontSize: 18,
+    fontSize: 12,
     color: color.black,
-    paddingLeft: 5,
-    fontWeight: '600',
     textAlign: 'center',
   },
   serInc: {
@@ -896,19 +815,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   btnContainer: {
-    //position: 'absolute',
-    //bottom: '3%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    //zIndex: 1,
-    paddingHorizontal: 20,
-    paddingBottom: 0,
+    padding: 10,
   },
   BtnStyle: {
-    width: '46%',
-    marginTop: 0,
+    width: '47%',
     marginBottom: '10%',
   },
 
