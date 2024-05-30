@@ -243,6 +243,7 @@ const UserDashboard = () => {
   return (
     <View style={{flex: 1}}>
       <HeaderWithSearchFilter
+        searchBAR={true}
         onPress={() => {
           navigation.openDrawer();
         }}

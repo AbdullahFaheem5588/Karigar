@@ -629,10 +629,12 @@ const ExpertDetail = props => {
         </View>
         <View style={styles.btnContainer}>
           <BtnComp
-            // onPressFunc={
-            //   () => navigation.navigate('IndividualChat', {currentuser: item})
-            //   //  navigation.navigate('ConversationScreen', {currentuser: item})
-            // }
+            onPressFunc={() =>
+              navigation.navigate('IndividualChat', {
+                route: 'ExpertDeatil',
+                currentuser: item?.user,
+              })
+            }
             btnText="Chat"
             BtnStyle={styles.BtnStyle}
           />

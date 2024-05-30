@@ -1,22 +1,22 @@
-import { StyleSheet, TouchableOpacity, Text, View } from 'react-native';
-import { React, useEffect, useState } from 'react';
+import {StyleSheet, TouchableOpacity, Text, View} from 'react-native';
+import {React, useEffect, useState} from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import color from '../Assets/colors/colors';
 import LinearGradient from 'react-native-linear-gradient';
-import { Image } from 'native-base';
+import {Image} from 'native-base';
 import OpeningCard from './OpeningCard';
 import SearchInput from './SearchInput';
-import { useIsFocused } from '@react-navigation/native';
-import { BASE_URL } from '../Screens/Signin/Signin';
-const HomeStackWithSearch = (props, { navigation }) => {
+import {useIsFocused} from '@react-navigation/native';
+import {BASE_URL} from '../Screens/Signin/Signin';
+const HomeStackWithSearch = (props, {navigation}) => {
   const focus = useIsFocused();
   const [profileData, setprofileData] = useState(null);
   const [name, setName] = useState(null);
-  const [profileimg, setprofileimg] = useState(null)
+  const [profileimg, setprofileimg] = useState(null);
   useEffect(() => {
     if (profileData) {
       setName(profileData.name);
-      setprofileimg(profileData.profile)
+      setprofileimg(profileData.profile);
     }
   }, [profileData, focus]);
 
@@ -27,34 +27,33 @@ const HomeStackWithSearch = (props, { navigation }) => {
   const GetProfileData = async () => {
     try {
       var myHeaders = new Headers();
-      myHeaders.append("Cookie", "PHPSESSID=nehf3e2dgdauiaooraluprccv7");
+      myHeaders.append('Cookie', 'PHPSESSID=nehf3e2dgdauiaooraluprccv7');
 
       var formdata = new FormData();
-      formdata.append("id", global.id);
+      formdata.append('id', global.id);
 
       var requestOptions = {
         method: 'POST',
         headers: myHeaders,
         body: formdata,
-        redirect: 'follow'
+        redirect: 'follow',
       };
 
       // fetch("https://fisdemoprojects.com/skilledman/api/user/get_profile.php", requestOptions)
       fetch(`${BASE_URL}user/get_profile.php`, requestOptions)
-
         .then(response => response.json())
         .then(result => {
-          console.log(result)
+          console.log(result);
 
           if (result) {
-            setprofileData(result)
+            setprofileData(result);
           }
         })
         .catch(error => console.log('error', error));
     } catch (error) {
-      Alert.alert(error)
+      Alert.alert(error);
     }
-  }
+  };
 
   return (
     <View style={styles.containerStyle}>
@@ -64,33 +63,31 @@ const HomeStackWithSearch = (props, { navigation }) => {
         </TouchableOpacity>
         <View style={styles.rightCont}>
           <TouchableOpacity onPress={props.onPressnotification}>
-            {(profileimg && profileimg.profile !== null) ?
+            {profileimg && profileimg.profile !== null ? (
               <Image
                 // source={{ uri: `https://fisdemoprojects.com/skilledman/api/uploads/${profileData?.profile}` }}
-                source={{ uri: `${BASE_URL}uploads/${profileData?.profile}` }}
-
+                source={{uri: `${BASE_URL}uploads/${profileData?.profile}`}}
                 resizeMode="cover"
                 style={styles.imgStyle}
-              //alt="user"
+                //alt="user"
               />
-              :
+            ) : (
               <Image
                 source={require('../Assets/Images/user.jpg')}
                 resizeMode="cover"
                 style={styles.imgStyle}
-              //alt="user"
+                //alt="user"
               />
-            }
+            )}
           </TouchableOpacity>
         </View>
       </View>
       <Text style={styles.userStyle}>Hi, {name}</Text>
-      <View style={styles.searchStyle}>
-        <SearchInput
-          onChangeText={props.onChangeText}
-          value={props.value}
-        />
-      </View>
+      {props.searchBAR === true ? (
+        <View style={styles.searchStyle}>
+          <SearchInput onChangeText={props.onChangeText} value={props.value} />
+        </View>
+      ) : null}
     </View>
   );
 };

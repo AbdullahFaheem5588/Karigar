@@ -10,23 +10,31 @@ import {
   FlatList,
   Modal,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import color from '../../Assets/colors/colors';
-import { createNavigationContainerRef, useIsFocused, useNavigation } from '@react-navigation/native';
+import {
+  createNavigationContainerRef,
+  useIsFocused,
+  useNavigation,
+} from '@react-navigation/native';
 import BookingCard from '../../Components/BookingCard';
 import DrawerTitleProfileHeader from '../../Components/DrawerTitleProfileHeader';
-const { height } = Dimensions.get('window');
-const { width } = Dimensions.get('window');
+const {height} = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 import Toast from 'react-native-simple-toast';
 import StarRating from 'react-native-star-rating';
-import { Icons } from '../../Components/Icons';
+import {Icons} from '../../Components/Icons';
 import C_TextInput from '../../Components/C_TextInput';
 import BtnComp from '../../Components/BtnComp';
 import Share from 'react-native-share';
-import { BASE_URL } from '../Signin/Signin';
+import {BASE_URL} from '../Signin/Signin';
+import {useSelector} from 'react-redux';
 const BookingScreen = () => {
   const focus = useIsFocused();
   const navigation = useNavigation();
+  const {data} = useSelector(state => state.ProfileReducer);
+  const {token} = useSelector(state => state.TokenReducer);
+
   const [Book_Data, setBook_Data] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [submitReviewVisible, setsubmitReviewVisible] = useState(false);
@@ -42,38 +50,22 @@ const BookingScreen = () => {
   const BookingData = async () => {
     try {
       var myHeaders = new Headers();
-      myHeaders.append('Cookie', 'PHPSESSID=2d0j4je2t3mdtg29p1ncvpab0b');
+      myHeaders.append('Authorization', `Bearer ${token}`);
 
-      var formdata = new FormData();
-      formdata.append('user_id', global.id);
-
-      var requestOptions = {
-        method: 'POST',
+      const requestOptions = {
+        method: 'GET',
         headers: myHeaders,
-        body: formdata,
         redirect: 'follow',
       };
 
-      // fetch(
-      //   'https://fisdemoprojects.com/skilledman/api/user/request_booking_service.php',
-      //   requestOptions,
-      // )
-      fetch(
-        `${BASE_URL}user/request_booking_service.php`,
-        requestOptions,
-      )
-
+      fetch(`${BASE_URL}bookings-details`, requestOptions)
         .then(response => response.json())
         .then(result => {
-          console.log(result, '1234');
-        
-
-          if (result.booking_request) {
-            setBook_Data(result.booking_request);
-
-          }
-          if (result.error) {
-            Toast.show(result.error);
+          if (result.bookings) {
+            console.log('🚀 ~ BookingData ~ result.bookings:', result.bookings);
+            setBook_Data(result.bookings);
+          } else {
+            Alert.alert(JSON.stringify(result));
           }
         })
         .catch(error => console.log('error', error));
@@ -99,7 +91,7 @@ const BookingScreen = () => {
         redirect: 'follow',
       };
       // const apiurl ='https://fisdemoprojects.com/skilledman/api/user/feedback.php';
-      const apiurl =`${BASE_URL}user/feedback.php`;
+      const apiurl = `${BASE_URL}user/feedback.php`;
 
       const response = await fetch(apiurl, requestOptions);
       const result = await response.json();
@@ -179,9 +171,9 @@ const BookingScreen = () => {
                 rating={rating}
                 halfStarEnabled // Enable half-star selection
                 selectedStar={handleRating}
-                containerStyle={{ marginVertical: 10 }}
+                containerStyle={{marginVertical: 10}}
                 starSize={40}
-                starStyle={{ marginRight: 5 }}
+                starStyle={{marginRight: 5}}
                 //iconSet="MaterialIcons"
                 emptyStarColor="lightgray"
                 fullStarColor="gold"
@@ -189,7 +181,7 @@ const BookingScreen = () => {
               />
             </View>
             <C_TextInput
-              styles={{ fontWeight: '400' }}
+              styles={{fontWeight: '400'}}
               numberOfLines={5}
               placeholder="Give your feedback"
               placeholderTextColor={color.lightGray}
@@ -203,7 +195,7 @@ const BookingScreen = () => {
                 setsubmitReviewVisible(!submitReviewVisible);
                 setReviewVisible(false);
               }}
-              BtnStyle={{ marginTop: 25 }}
+              BtnStyle={{marginTop: 25}}
               btnText="Submit"
             />
           </View>
@@ -229,7 +221,7 @@ const BookingScreen = () => {
           </View>
           <View style={styles.modalBody}>
             <TouchableOpacity
-              style={[styles.attachCont, { ...styles.revListing }]}>
+              style={[styles.attachCont, {...styles.revListing}]}>
               <Icons.FontAwesome5
                 name="exclamation-circle"
                 size={20}
@@ -280,20 +272,20 @@ const BookingScreen = () => {
         <View style={styles.cardContainer}>
           <FlatList
             data={Book_Data}
-            renderItem={({ item }) => (
+            renderItem={({item}) => (
               <BookingCard
-                cardTitle={item.name}
-                bookingId={`Booking ID - ${item.booking_id}`}
-                expertise={`Expert ${item.service}`}
+                cardTitle={item.provider_name}
+                bookingId={`Booking ID - ${item.id}`}
+                expertise={`Expert ${(item.service && item.service) || 'N/A'}`}
                 status={item.status}
-                paidTitle={item.service_date}
+                paidTitle={item.booking_date && item.booking_date.split(' ')[0]}
                 dateCont={styles.dateCont}
                 filepress={item.file}
                 toggleReviewModal={() => {
-                  toggleReview(item.booking_id, item.provider_id);
+                  toggleReview(item.id, item.provider_id);
                   getDetails(item);
                 }}
-              // toggleReviewModal={() => console.log("helo baby ", "provideer id", item.booking_id, item.provider_id)}
+                // toggleReviewModal={() => console.log("helo baby ", "provideer id", item.booking_id, item.provider_id)}
               />
             )}
           />

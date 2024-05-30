@@ -1,71 +1,76 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView, FlatList, Alert } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+  Alert,
+} from 'react-native';
 import FlatListCard from '../../Components/FlatListCard';
 import Toast from 'react-native-simple-toast';
-import { useIsFocused } from '@react-navigation/native';
-import { BASE_URL } from '../Signin/Signin';
-const OngoingTab = (props) => {
+import {useIsFocused} from '@react-navigation/native';
+import {BASE_URL} from '../Signin/Signin';
+import {useSelector} from 'react-redux';
+const OngoingTab = props => {
   const focus = useIsFocused();
   const [modalVisible, setModalVisible] = useState(false);
-  const [data, setData] = useState()
+  const [data, setData] = useState([]);
 
   const toggleModal = () => {
     setModalVisible(!modalVisible);
   };
+  const {token} = useSelector(state => state.TokenReducer);
 
   useEffect(() => {
     GetData();
-  }, [focus, props?.value])
+  }, [focus]);
   const GetData = async () => {
     try {
-      var myHeaders = new Headers();
-      myHeaders.append("Cookie", "PHPSESSID=pqe6giac1t2jjjqkr6sh3r747i");
+      const myHeaders = new Headers();
+      myHeaders.append('Authorization', `Bearer ${token}`);
 
-      var formdata = new FormData();
-      formdata.append("provider_id", global.id);
-      formdata.append("status", "progress");
-      if (props?.value) {
-        formdata.append("searchTerm", props?.value);
-      }
-
-      var requestOptions = {
-        method: 'POST',
+      const requestOptions = {
+        method: 'GET',
         headers: myHeaders,
-        body: formdata,
-        redirect: 'follow'
+        redirect: 'follow',
       };
-      // const apiurl = "https://fisdemoprojects.com/skilledman/api/provider_status.php"
-      const apiurl = `${BASE_URL}provider_status.php`
 
-      const response = await fetch(apiurl, requestOptions)
-      const result = await response.json();
-      if (result && result.booking_request) {
-        setData(result.booking_request)
-      }
-      else if (result && result.error) {
-        Toast.show(result.error);
-      }
+      fetch(`${BASE_URL}provider_bookings`, requestOptions)
+        .then(response => response.json())
+        .then(result => {
+          if (result && Array.isArray(result.bookings)) {
+            console.log('🚀 ~ GetData ~ result.bookings:', result.bookings);
+            const confirmedBookings = result.bookings.filter(
+              booking => booking.status === 'pending',
+            );
+            if (confirmedBookings.length > 0) {
+              setData(confirmedBookings);
+            } else {
+              Toast.show('No bookings found.', Toast.LONG);
+            }
+          } else {
+            Alert.alert(JSON.stringify(result));
+          }
+        })
+        .catch(error => console.error(error));
       //console.log(result)
+    } catch (error) {
+      Alert.alert(error);
     }
-    catch (error) {
-      Alert.alert(error)
-    }
-
-  }
+  };
 
   return (
-    <ScrollView style={[styles.container, { maxHeight: "51%" }]}>
+    <ScrollView style={[styles.container, {maxHeight: '51%'}]}>
       <FlatList
         data={data}
-        renderItem={({ item }) => (
+        renderItem={({item}) => (
           <FlatListCard
             cardTitle={item.name}
-            bookingId={`Booking ID - ${item.booking_id}`}
-            date={item.service_date}
-            time={item.service_time}
+            bookingId={`Booking ID - ${item.id}`}
+            date={item.booking_date && item?.booking_date.split(' ')[0]}
             paidTitle="Paid"
-            status="28%"
-            filepress={item.file}
+            status={item?.status}
           />
         )}
       />

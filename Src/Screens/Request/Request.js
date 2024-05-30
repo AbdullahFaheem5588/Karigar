@@ -8,125 +8,100 @@ import {
   ScrollView,
   Alert,
   FlatList,
-  Linking
+  Linking,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import color from '../../Assets/colors/colors';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
+import {useNavigation, useIsFocused} from '@react-navigation/native';
 import HomeStackWithSearch from '../../Components/HomeStackWithSearch';
-import { Modal } from 'react-native-paper';
-import Icon, { Icons } from '../../Components/Icons';
+import {Modal} from 'react-native-paper';
+import Icon, {Icons} from '../../Components/Icons';
 import FlatListCard from '../../Components/FlatListCard';
 import BtnComp from '../../Components/BtnComp';
 import Toast from 'react-native-simple-toast';
-import { BASE_URL } from '../Signin/Signin';
+import {BASE_URL} from '../Signin/Signin';
+import {useSelector} from 'react-redux';
 
-const { height } = Dimensions.get('window');
-const { width } = Dimensions.get('window');
+const {height} = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
 const RequestScreen = () => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const focused = useIsFocused();
-  const [booklist, setbooklist] = useState([])
-  const [currentitem, setCurrentItem] = useState()
+  const [booklist, setbooklist] = useState([]);
+  const [currentitem, setCurrentItem] = useState();
   const [searchTerm, setsearchTerm] = useState('');
 
-  const toggleModal = (item) => {
-    console.log(item, "modal item")
+  const toggleModal = item => {
+    console.log(item, 'modal item');
     setModalVisible(!modalVisible);
     setCurrentItem(item);
-    console.log("current item", currentitem)
-
   };
 
+  const {token} = useSelector(state => state.TokenReducer);
 
   useEffect(() => {
     const getBookingRequest = async () => {
-
       const myHeaders = new Headers();
-      myHeaders.append("Cookie", "PHPSESSID=5sfeloifjcmrpti44vvqmr763q");
+      myHeaders.append('Authorization', `Bearer ${token}`);
 
-      const formdata = new FormData();
-      formdata.append("provider_id", global.id);
-      if (searchTerm !== '') {
-        formdata.append("searchTerm", searchTerm);
-      }
       const requestOptions = {
-        method: 'POST',
+        method: 'GET',
         headers: myHeaders,
-        body: formdata,
         redirect: 'follow',
       };
 
-      // const apiurl = "https://fisdemoprojects.com/skilledman/api/provider_status.php";
-      const apiurl = `${BASE_URL}provider_status.php`;
-
-
-      const response = await fetch(apiurl, requestOptions);
-      const result = await response.json();
-
-      if (result && result.booking_request) {
-        setbooklist(result.booking_request)
-        console.log("Getting all user requests to me", result);
-      }
-      else if (result && result.error) {
-        Toast.show(result.error);
-      }
+      fetch(`${BASE_URL}provider_bookings`, requestOptions)
+        .then(response => response.json())
+        .then(result => {
+          if (result && result.bookings) {
+            setbooklist(result.bookings);
+          } else {
+            Alert.alert(JSON.stringify(result));
+          }
+        })
+        .catch(error => console.error(error));
     };
     getBookingRequest();
   }, [focused, searchTerm]);
 
+  const changestatus = async status => {
+    const myHeaders = new Headers();
+    myHeaders.append('Content-Type', 'application/json');
+    myHeaders.append('Authorization', `Bearer ${token}`);
 
-  const changestatus = async (v) => {
-    // const remainingItems = booklist.filter((item) => (item.booking_id != currentitem.booking_id))
-    // setbooklist(remainingItems)
-    // console.log(v, 'vvvvvsvvvvv')
-    try {
-      var myHeaders = new Headers();
-      myHeaders.append("Cookie", "PHPSESSID=5sfeloifjcmrpti44vvqmr763q");
-      var formdata = new FormData()
-      formdata.append("id", currentitem.booking_id);
-      formdata.append("status", v)
+    const raw = JSON.stringify({
+      status: status,
+      notes: `Booking ${status} by Expert`,
+    });
 
-      const requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: formdata,
-        redirect: 'follow',
-      };
+    const requestOptions = {
+      method: 'PUT',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'follow',
+    };
 
-      // const apiurl = "https://fisdemoprojects.com/skilledman/api/status_update.php";
-      const apiurl = `${BASE_URL}status_update.php`;
-
-      const response = await fetch(apiurl, requestOptions);
-      const result = await response.json();
-      if (result.success) {
-        Toast.show(result.success);
-        setbooklist(booklist)
-      }
-    } catch (error) {
-      Alert.alert(error)
-    }
-
-  };
-  const openFile = () => {
-    // const fileURL = `https://fisdemoprojects.com/skilledman/api/uploads/${currentitem.file}`;
-    const fileURL = `${BASE_URL}uploads/${currentitem.file}`;
-
-
-    // Use Linking to open the file URL
-    Linking.openURL(fileURL)
-      .catch((err) => {
-        console.error(`Error opening file: ${err}`);
-        // You can show an error message to the user if the file can't be opened
-      });
+    fetch(`${BASE_URL}update_booking/${currentitem.id}`, requestOptions)
+      .then(response => response.json())
+      .then(result => {
+        if (
+          result &&
+          result?.message === 'Booking status updated successfully'
+        ) {
+          if (status === 'cancelled') {
+            Toast.show('You cancelled the booking', Toast.LONG);
+          } else {
+            Toast.show('You confirmed the booking', Toast.LONG);
+          }
+        } else {
+          Alert.alert(JSON.stringify(result));
+        }
+      })
+      .catch(error => console.error(error));
   };
 
-  // useEffect(() => {
-  // //   console.log("current item", currentitem);
-  // // }, [currentitem]);
-  //console.log(searchTerm, 'reuwsygsv')
   return (
     <>
       <ScrollView style={styles.scrollViewStyle}>
@@ -137,31 +112,29 @@ const RequestScreen = () => {
           onPressnotification={() => {
             navigation.navigate('edit_profile');
           }}
-          onChangeText={(val) => { setsearchTerm(val) }}
+          onChangeText={val => {
+            setsearchTerm(val);
+          }}
           value={searchTerm}
         />
         <View style={styles.cardContainer}>
-
           <FlatList
             data={booklist}
-            renderItem={({ item, index }) => (
+            renderItem={({item, index}) => (
               <FlatListCard
                 index={index}
                 cardTitle={item.name}
-                bookingId={`Booking ID - ${item.booking_id}`}
-                date={item.service_date}
+                bookingId={`Booking ID - ${item.id}`}
+                date={item.created_at.split('T')[0]}
                 time={item.service_time}
                 status={item.status}
                 onPressShowProfile={() => toggleModal(item)}
                 iconName="ellipsis-v"
-                filepress={item.file}
               />
             )}
           />
-
         </View>
         {/* Modal and its content go here */}
-
       </ScrollView>
 
       <Modal
@@ -183,40 +156,32 @@ const RequestScreen = () => {
             </View>
 
             <View style={styles.successmodalBody}>
-              {currentitem?.profile ?
-                <Image
-                  style={styles.logoImg}
-                  resizeMode="contain"
-                  // source={{ uri: `https://fisdemoprojects.com/skilledman/api/uploads/${currentitem.profile}` }}
-                  source={{ uri: `${BASE_URL}uploads/${currentitem.profile}` }}
+              <Image
+                style={styles.logoImg}
+                resizeMode="contain"
+                source={require('../../Assets/Images/profile.jpg')}
+              />
 
-                />
-                :
-                <Image
-                  style={styles.logoImg}
-                  resizeMode="contain"
-                  source={require('../../Assets/Images/profile.jpg')}
-                />
-              }
-
-              <Text style={styles.pendAppr}>{currentitem && currentitem.name}</Text>
-              <Text style={styles.bookingStyle}>Booking ID- {currentitem && currentitem.booking_id}</Text>
+              <Text style={styles.pendAppr}>
+                {currentitem && currentitem.name}
+              </Text>
+              <Text style={styles.bookingStyle}>
+                Booking ID- {currentitem && currentitem.id}
+              </Text>
               <View style={styles.dateTimeCont}>
-                <Text style={styles.dateStyle}>{currentitem && currentitem.service_date}</Text>
-                <Text style={styles.bookingStyle}>({currentitem && currentitem.service_time})</Text>
+                <Text style={styles.dateStyle}>
+                  {currentitem &&
+                    currentitem.created_at &&
+                    currentitem.created_at.split('T')[0]}
+                </Text>
+                <Text style={styles.bookingStyle}>
+                  (
+                  {currentitem &&
+                    currentitem.created_at &&
+                    currentitem.created_at.split('T')[1].split('.')[0]}
+                  )
+                </Text>
               </View>
-              <View style={styles.dateTimeCont}>
-                <TouchableOpacity onPress={openFile} style={{ flexDirection: 'row' }}>
-                  <Icons.FontAwesome
-                    name="file-text"
-                    size={22}
-                    color={color.darkGray}
-                  />
-                  <Text style={styles.bookingStyle}> Service Detail</Text>
-                </TouchableOpacity>
-              </View>
-
-              <Text style={styles.getDir}> Get Direction</Text>
             </View>
 
             <View style={styles.btnContainer}>
@@ -225,8 +190,8 @@ const RequestScreen = () => {
                 btnTextStyle={styles.btnTextStyle}
                 btnText="Accept"
                 onPressFunc={() => {
-                  changestatus('progress')
-                  setModalVisible(false)
+                  changestatus('confirmed');
+                  setModalVisible(false);
                 }}
               />
               <BtnComp
@@ -234,8 +199,8 @@ const RequestScreen = () => {
                 btnTextStyle={styles.btnTextStyle}
                 btnText="Reject"
                 onPressFunc={() => {
-                  changestatus('reject')
-                  setModalVisible(false)
+                  changestatus('cancelled');
+                  setModalVisible(false);
                 }}
               />
             </View>
@@ -247,8 +212,6 @@ const RequestScreen = () => {
 };
 
 export default RequestScreen;
-
-
 
 const styles = StyleSheet.create({
   linearGradientStyle: {
@@ -284,7 +247,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     marginTop: 40,
     marginBottom: 27,
-
   },
 
   modalContainer: {

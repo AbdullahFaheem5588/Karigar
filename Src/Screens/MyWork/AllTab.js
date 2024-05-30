@@ -1,22 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView, FlatList, Alert } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+  Alert,
+} from 'react-native';
 import FlatListCard from '../../Components/FlatListCard';
 import Toast from 'react-native-simple-toast';
-import { useIsFocused } from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 import color from '../../Assets/colors/colors';
-import { Modal } from 'react-native-paper';
-import { Icons } from '../../Components/Icons';
+import {Modal} from 'react-native-paper';
+import {Icons} from '../../Components/Icons';
 import OngoingDropdown from '../../Components/OngoingDropdown';
 import BtnComp from '../../Components/BtnComp';
-import { BASE_URL } from '../Signin/Signin';
-const AllTab = (props) => {
+import {BASE_URL} from '../Signin/Signin';
+import {useSelector} from 'react-redux';
+const AllTab = props => {
   //console.log(props.value, 'on all')
   const focus = useIsFocused();
   const [modalVisible, setModalVisible] = useState(false);
-  const [data, setData] = useState()
-  console.log(data, 'qwert')
+  const [data, setData] = useState([]);
   const [selectedBusiness, setselectedBusiness] = useState('0');
   const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const {token} = useSelector(state => state.TokenReducer);
 
   const toggleModal = () => {
     setModalVisible(!modalVisible);
@@ -24,90 +32,80 @@ const AllTab = (props) => {
 
   useEffect(() => {
     GetData();
-  }, [focus, props?.value])
+  }, [focus]);
 
   const GetData = async () => {
-    try {
-      var myHeaders = new Headers();
-      myHeaders.append("Cookie", "PHPSESSID=pqe6giac1t2jjjqkr6sh3r747i");
+    const myHeaders = new Headers();
+    myHeaders.append('Authorization', `Bearer ${token}`);
 
-      var formdata = new FormData();
-      formdata.append("provider_id", global.id);
-      if (props?.value) {
-        formdata.append("searchTerm", props?.value);
-      }
-      var requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: formdata,
-        redirect: 'follow'
-      };
-      // const apiurl = "https://fisdemoprojects.com/skilledman/api/provider_status.php"
-      const apiurl = `${BASE_URL}provider_status.php`
+    const requestOptions = {
+      method: 'GET',
+      headers: myHeaders,
+      redirect: 'follow',
+    };
 
+    fetch(`${BASE_URL}provider_bookings`, requestOptions)
+      .then(response => response.json())
+      .then(result => {
+        if (result && result.bookings) {
+          setData(result.bookings);
+        } else {
+          Alert.alert(JSON.stringify(result));
+        }
+      })
+      .catch(error => console.error(error));
+  };
+  const changestatus = async status => {
+    const myHeaders = new Headers();
+    myHeaders.append('Content-Type', 'application/json');
+    myHeaders.append('Authorization', `Bearer ${token}`);
 
-      const response = await fetch(apiurl, requestOptions)
-      const result = await response.json();
-      if (result && result.booking_request) {
-        setData(result.booking_request)
-      }
-      else if (result && result.error) {
-        Toast.show(result.error);
-      }
-    }
-    catch (error) {
-      Alert.alert(error)
-    }
+    const raw = JSON.stringify({
+      status: status,
+      notes: `Booking ${status} by Expert`,
+    });
 
+    const requestOptions = {
+      method: 'PUT',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'follow',
+    };
 
-  }
-  console.log(selectedBusiness, 'yetefd')
-  const changestatus = async (bookingId) => {
-    console.log(bookingId)
-    try {
-      var myHeaders = new Headers();
-      myHeaders.append("Cookie", "PHPSESSID=5sfeloifjcmrpti44vvqmr763q");
-      var formdata = new FormData()
-      formdata.append("id", bookingId);
-      formdata.append("status", selectedBusiness)
-
-      const requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: formdata,
-        redirect: 'follow',
-      };
-
-      // const apiurl = "https://fisdemoprojects.com/skilledman/api/status_update.php";
-      const apiurl = `${BASE_URL}status_update.php`;
-
-      const response = await fetch(apiurl, requestOptions);
-      const result = await response.json();
-      if (result.success) {
-        Toast.show(result.success);
-      }
-    } catch (error) {
-      Alert.alert(error)
-    }
-
+    fetch(`${BASE_URL}update_booking/${selectedBookingId}`, requestOptions)
+      .then(response => response.json())
+      .then(result => {
+        if (
+          result &&
+          result?.message === 'Booking status updated successfully'
+        ) {
+          if (status === 'cancelled') {
+            Toast.show('You cancelled the booking', Toast.LONG);
+          } else {
+            Toast.show('You confirmed the booking', Toast.LONG);
+          }
+        } else {
+          Alert.alert(JSON.stringify(result));
+        }
+      })
+      .catch(error => console.error(error));
   };
 
   return (
     <>
-      <ScrollView style={[styles.container,{maxHeight:"51%"}]}>
-
+      <ScrollView style={[styles.container, {maxHeight: '51%'}]}>
         <FlatList
           data={data}
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <FlatListCard
               cardTitle={item.name}
-              bookingId={`Booking ID - ${item.booking_id}`}
-              date={item.service_date}
+              bookingId={`Booking ID - ${item.id}`}
+              date={item.booking_date && item.booking_date.split(' ')[0]}
               time={item.service_time}
               status={item.status}
               iconName="ellipsis-v"
               onPressShowProfile={() => {
-                setSelectedBookingId(item.booking_id); // Store the selected booking_id
+                setSelectedBookingId(item.id); // Store the selected booking_id
                 toggleModal();
               }}
               filepress={item.file}
@@ -141,7 +139,6 @@ const AllTab = (props) => {
         iconName="ellipsis-v"
         onPressShowProfile={toggleModal}
       /> */}
-
       </ScrollView>
       <Modal
         animationType="slide"
@@ -162,7 +159,10 @@ const AllTab = (props) => {
             </View>
 
             <View style={styles.successmodalBody}>
-              <OngoingDropdown selectedBusiness={selectedBusiness} setselectedBusiness={setselectedBusiness} />
+              <OngoingDropdown
+                selectedBusiness={selectedBusiness}
+                setselectedBusiness={setselectedBusiness}
+              />
             </View>
 
             <View style={styles.btnContainer}>
@@ -172,10 +172,10 @@ const AllTab = (props) => {
                 btnText="Submit"
                 onPressFunc={() => {
                   if (selectedBookingId) {
-                    changestatus(selectedBookingId); // Pass the selected booking_id
+                    changestatus(selectedBusiness); // Pass the selected booking_id
                     toggleModal();
                   } else {
-                    Alert.alert("Please select a booking before submitting.");
+                    Alert.alert('Please select a booking before submitting.');
                   }
                 }}
               />
@@ -198,7 +198,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
     marginLeft: 0,
-    marginRight: 0, height: '100%'
+    marginRight: 0,
+    height: '100%',
   },
   iconCont: {
     width: '38%',

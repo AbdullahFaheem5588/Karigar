@@ -37,7 +37,7 @@ import {Picker} from '@react-native-picker/picker';
 import {Country, State, City, getAllCountries} from 'country-state-city';
 import C_TextInput from '../../Components/C_TextInput';
 import Toast from 'react-native-simple-toast';
-import { BASE_URL } from '../Signin/Signin';
+import {BASE_URL} from '../Signin/Signin';
 const Dashboard = () => {
   const navigation = useNavigation();
   const isfocused = useIsFocused();
@@ -127,54 +127,6 @@ const Dashboard = () => {
     setSelectedExperience(selectedValue);
   };
 
-  useEffect(() => {
-    {
-      state.isAuth == true
-        ? //Alert.alert('Disclaimer notice')
-          setModalVisible(true)
-        : setsigninmodal(true);
-    }
-  }, []);
-  console.log('globalstaus', global.states);
-
-  const [signinmodal, setsigninmodal] = useState(false);
-  const [isUserSignedIn, setIsUserSignedIn] = useState();
-  const [isFirstLogin, setIsFirstLogin] = useState(false);
-
-  useEffect(() => {
-    // Check if the user has logged in for the first time
-    const checkFirstLogin = async () => {
-      try {
-        const hasLoggedBefore = await AsyncStorage.getItem('hasLoggedBefore');
-        if (!hasLoggedBefore) {
-          // If it's the first login, show the modal
-          setsigninmodal(true);
-          setIsFirstLogin(true);
-          // Save in AsyncStorage to mark that the user has logged in before
-          await AsyncStorage.setItem('hasLoggedBefore', 'true');
-        }
-      } catch (error) {
-        console.error('Error checking first login:', error);
-      }
-    };
-
-    checkFirstLogin();
-  }, []); // Empty dependency array ensures this runs only once on component mount
-
-  const closeModal = () => {
-    setsigninmodal(false);
-  };
-
-  useEffect(() => {
-    // Example: Check whether the user is signed in
-    const userSignedIn = state.isAuth === true; // Adjust based on your authentication logic
-    setIsUserSignedIn(userSignedIn);
-
-    if (userSignedIn) {
-      setsigninmodal(true);
-    }
-  }, [state.isAuth]);
-
   const HandleAdddetials = async () => {
     if (
       selectedBusiness == 'select_bussiness' ||
@@ -218,16 +170,10 @@ const Dashboard = () => {
       //   'https://fisdemoprojects.com/skilledman/api/add_users_detail.php',
       //   requestOptions,
       // )
-      fetch(
-        `${BASE_URL}add_users_detail.php`,
-        requestOptions,
-      )
-
-
-
+      fetch(`${BASE_URL}add_users_detail.php`, requestOptions)
         .then(response => response.text())
         .then(result => console.log(result));
-      if (result.status) { 
+      if (result.status) {
         setLoad(false);
         navigation.navigate('AddBank');
       } else if (result.error) {
@@ -254,8 +200,7 @@ const Dashboard = () => {
           redirect: 'follow',
         };
         // const apiurl ='https://fisdemoprojects.com/skilledman/api/get_services.php';
-        const apiurl =`${BASE_URL}get_services.php`;
-
+        const apiurl = `${BASE_URL}get_services.php`;
 
         const response = await fetch(apiurl, requestOptions);
         const result = await response.json();
@@ -342,367 +287,6 @@ const Dashboard = () => {
           />
         </View>
       </ScrollView>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Disclaimer Notice</Text>
-            </View>
-
-            <View style={styles.modalBody}>
-              <ScrollView>
-                <Text style={{color: 'black', textAlign: 'justify'}}>
-                  The following disclaimer outlines the terms of use for
-                  Skilledman App, a platform designed to connect artisans and
-                  users. By accessing or using the Skilledman application, you
-                  agree to comply with the terms and conditions outlined below.
-                  Skilledman App serves as a medium for facilitating
-                  communication and transactions between artisans and users.We
-                  do not take responsibility for the quality, pricing, delivery,
-                  or any other aspects of the products or services offered by
-                  artisans. We do not endorse, guarantee, or take responsibility
-                  for the accuracy, reliability, or legality of any content,
-                  products, or services provided by artisans on the
-                  platform.Users are advised to exercise their own discretion
-                  and judgment before engaging in any transactions. Skilledman
-                  App is not liable for any direct, indirect, incidental,
-                  special, or consequential damages that may arise from the use
-                  of the platform, including but not limited to, any losses
-                  incurred from transactions with artisans. Users are
-                  responsible for conducting their own due diligence, including
-                  verifying the credentials, qualifications, and background of
-                  artisans before engaging in any business transactions. We
-                  reserve the right to suspend, terminate, or modify any part of
-                  the platform without prior notice.We are not liable for any
-                  damages or losses resulting from such actions. By using
-                  Skilledman App, you acknowledge that you have read and
-                  understood this disclaimer and agree to be bound by its terms
-                  and conditions.If you do not agree with any part of this
-                  disclaimer, please refrain from using the Skilledman
-                  application. Click agree
-                </Text>
-              </ScrollView>
-              <View style={styles.btnContainer}>
-                <BtnComp
-                  BtnStyle={styles.acceptStyle}
-                  btnTextStyle={styles.btnTextStyle}
-                  btnText="Agree"
-                  onPressFunc={() => {
-                    setModalVisible(false);
-                  }}
-                />
-              </View>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* <Modal
-        animationType="slide"
-        transparent={true}
-        visible={signinmodal}
-        onRequestClose={() => setsigninmodal(false)}>
-        <View style={styles.modalContainertwo}>
-          <View style={styles.modalView}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Complete Profile</Text>
-            </View>
-            <View
-             style={{marginTop:10}}
-            >
-              <Text style={{color: 'black', textAlign: 'center', fontSize: 22}}>
-                Congragulation for Sign In
-              </Text>
-              <Text style={{color: 'black', textAlign: 'center', fontSize:22}}>
-                Please Complete the Profile
-              </Text>
-            </View>
-
-            <View style={styles.modalBody}>
-              <View style={styles.btnContainer}></View>
-              <View style={styles.btnContainer}>
-                <BtnComp
-                  BtnStyle={styles.acceptStyle}
-                  btnTextStyle={styles.btnTextStyle}
-                  btnText="Add Bussiness"
-                  onPressFunc={() => {
-                    setsigninmodal(false);
-                    navigation.navigate('PublicRoutes', {
-                      screen: 'AddBusiness',
-                    });
-                  }}
-                />
-              </View>
-            </View>
-          </View>
-        </View>
-      </Modal> */}
-      {/* {!signinmodal && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={signinmodal}
-          onRequestClose={() => setsigninmodal(false)}>
-          <View style={styles.modalContainertwo}>
-            <View style={styles.modalView}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Complete Profile</Text>
-              </View>
-              <View style={{marginTop: 10}}>
-                <Text
-                  style={{color: 'black', textAlign: 'center', fontSize: 22}}>
-                  Congratulation for Sign In
-                </Text>
-                <Text
-                  style={{color: 'black', textAlign: 'center', fontSize: 22}}>
-                  Please Complete the Profile
-                </Text>
-              </View>
-
-              <View style={styles.modalBody}>
-                <View style={styles.btnContainer}></View>
-                <View style={styles.btnContainer}>
-                  <BtnComp
-                    BtnStyle={styles.acceptStyle}
-                    btnTextStyle={styles.btnTextStyle}
-                    btnText="Add Business"
-                    onPressFunc={() => {
-                      setsigninmodal(false);
-                      navigation.navigate('PublicRoutes', {
-                        screen: 'SetPassword',
-                      });
-                    }}
-                  />
-                </View>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      )} */}
-      {/* <Modal
-  animationType="slide"
-  transparent={true}
-  // visible={isUserSignedIn && signinmodal} 
-  // onRequestClose={() => setsigninmodal(false)}
-  visible={signinmodal}
-  onRequestClose={closeModal}>
-  
-  <View style={styles.modalContainertwo}>
-    <View style={styles.modalView}>
-      <View style={styles.modalHeader}>
-        <Text style={styles.modalTitle}>Complete Profile</Text>
-      </View>
-      <View style={{ marginTop: 10 }}>
-        <Text style={{ color: 'black', textAlign: 'center', fontSize: 22 }}>
-          Congratulation for Sign In
-        </Text>
-        <Text style={{ color: 'black', textAlign: 'center', fontSize: 22 }}>
-          Please Complete the Profile
-        </Text>
-      </View>
-
-      <View style={styles.modalBody}>
-        <View style={styles.btnContainer}></View>
-        <View style={styles.btnContainer}>
-          <BtnComp
-            BtnStyle={styles.acceptStyle}
-            btnTextStyle={styles.btnTextStyle}
-            btnText="Add Business"
-            onPressFunc={() => {
-              setsigninmodal(false);
-              navigation.navigate('PublicRoutes', {
-                screen: 'Addbusines',
-              });
-            }}
-          />
-        </View>
-      </View>
-    </View>
-  </View>
-</Modal> */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={signinmodal}
-        onRequestClose={() => setsigninmodal(false)}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                If Already Add busineess then dont submitted,Press Ok{' '}
-              </Text>
-            </View>
-
-            <View style={styles.modalBody}>
-              <ScrollView>
-                <View style={styles.dropdownContainer}>
-                  <C_Dropdown
-                    selectedValue="Select Business"
-                    options={item}
-                    onValueChange={handleBusinessSelect}
-                  />
-                </View>
-                <View style={styles.dropdownContainer}>
-                  <C_Dropdown
-                    selectedValue="Working Experience"
-                    options={ExperienceOption}
-                    onValueChange={handleExperienceSelect}
-                  />
-                </View>
-                <TouchableOpacity
-                  onPress={() => handleFilePick('Certificates')}>
-                  <View style={styles.inputContainer}>
-                    <UploadfilewithIcon
-                      placeholder="Certificates"
-                      icon="upload"
-                      // handleFilePick={handleFilePick}
-                      title={certficate}
-                    />
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleFilePick('Job References')}>
-                  <View style={styles.inputContainer}>
-                    <UploadfilewithIcon
-                      placeholder="Job References"
-                      icon="upload"
-                      // handleFilePick={handleFilePick}
-                      title={jobReferences}
-                    />
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleFilePick('Guarantor')}>
-                  <View style={styles.inputContainer}>
-                    <UploadfilewithIcon
-                      placeholder="Guarantor"
-                      icon="upload"
-                      // handleFilePick={handleFilePick}
-                      title={Guarantor}
-                    />
-                  </View>
-                </TouchableOpacity>
-
-                <View style={styles.inputContainer}>
-                  <C_TextInput
-                    placeholder="Phone Number"
-                    placeholderTextColor={color.default}
-                    onChangeText={setnumber}
-                    //onBlur={handleBlur('phone_number')}
-                    value={number}
-                  />
-                  {/* {touched.phone_number && errors.phone_number ? (
-                  <Text style={styles.errorText}>{errors.phone_number}</Text>
-                ) : null} */}
-                </View>
-                <View style={styles.inputContainer}>
-                  <C_TextInput
-                    placeholder="Address"
-                    placeholderTextColor={color.default}
-                    onChangeText={setaddress}
-                    //  onBlur={handleBlur('address')}
-                    value={address}
-                  />
-                  {/* {touched.address && errors.address ? (
-                  <Text style={styles.errorText}>{errors.address}</Text>
-                ) : null} */}
-                </View>
-
-                <View style={styles.inputContainer}>
-                  <View style={styles.DropDownContainer}>
-                    <Picker
-                      ref={pickerRef}
-                      selectedValue={selectedCountry}
-                      onValueChange={itemValue => onCountryChange(itemValue)}
-                      enabled={true}
-                      mode={'dialog'}
-                      dropdownIconColor={color.default}
-                      selectionColor={color.yellow}
-                      itemStyle={styles.itemsStyle}>
-                      <Picker.Item
-                        label="Select Country"
-                        value=""
-                        color={color.default}
-                        fontWeight="bold"
-                        fontSize={17}
-                      />
-                      {countries.map((country, index) => (
-                        <Picker.Item
-                          key={country.isoCode}
-                          label={country.name}
-                          value={country.isoCode}
-                          color={color.default}
-                          fontWeight="bold"
-                          fontSize={17}
-                        />
-                      ))}
-                    </Picker>
-                  </View>
-                  {countryError && (
-                    <Text style={styles.errorText}>
-                      Please select a country.
-                    </Text>
-                  )}
-                </View>
-                <View
-                  style={{
-                    width: '80%',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginVertical: 10,
-                    marginBottom: '22%',
-                  }}>
-                  <C_TextInput
-                    placeholder="Association"
-                    placeholderTextColor={color.default}
-                    onChangeText={setassociation}
-                    // onBlur={handleBlur('association')}
-                    value={association}
-                  />
-                </View>
-              </ScrollView>
-              <View style={styles.btnContainer}>
-                <BtnComp
-
-                  BtnStyle={styles.BtnStyle}
-                  btnText={
-                    load ? (
-                      <ActivityIndicator size={28} color="#f8f8ff" />
-                    ) : (
-                      'OK'
-                    )
-                  }
-                  onPressFunc={() => {
-                    HandleAdddetials();
-
-                    setsigninmodal(false);
-                    //navigation.navigate('AddBank');
-                  }}
-                />
-                <BtnComp
-                  BtnStyle={styles.BtnStyle}
-                  btnText={
-                    load ? (
-                      <ActivityIndicator size={28} color="#f8f8ff" />
-                    ) : (
-                      'Add bank'
-                    )
-                  }
-                  onPressFunc={() => {
-                    //  navigation.navigate('edit_profile');
-                    navigation.navigate('PublicRoutes', {
-                      screen: 'AddBankGoogle',
-                    });
-                  }}
-                />
-              </View>
-            </View>
-          </View>
-        </View>
-      </Modal>
 
       {/* <Modal
   animationType="slide"
@@ -944,7 +528,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     backgroundColor: color.white,
   },
- 
+
   successmodalBody: {
     flexDirection: 'column',
     justifyContent: 'center',

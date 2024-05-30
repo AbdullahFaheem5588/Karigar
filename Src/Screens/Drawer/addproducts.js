@@ -35,6 +35,8 @@ const AddProducts = props => {
   const {data} = useSelector(state => state.ProfileReducer);
 
   const [NumberofEXp, setDescription] = useState('');
+  const [stock, setStock] = useState('');
+
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
 
@@ -209,6 +211,13 @@ const AddProducts = props => {
             placeholder="Description"
             placeholderTextColor={color.gray}
             onChangeText={text => setDescription(text)}
+          />
+          <C_SkillInputs
+            style={{color: color.gray}}
+            value={stock}
+            placeholder="Stock"
+            placeholderTextColor={color.gray}
+            onChangeText={text => setStock(text)}
           />
 
           <TouchableOpacity style={styles.addSkill} onPress={handleFilePick}>

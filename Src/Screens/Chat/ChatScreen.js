@@ -38,6 +38,7 @@ const ChatScreen = props => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const {token} = useSelector(state => state.TokenReducer);
+  const {data} = useSelector(state => state.ProfileReducer);
 
   useEffect(() => {
     const gellAllChat = async () => {
@@ -108,10 +109,17 @@ const ChatScreen = props => {
         renderItem={({item}) => (
           <ProfileCard
             showProfile={() => {
-              navigation.navigate('IndividualChat', {currentuser: item});
+              navigation.navigate('IndividualChat', {
+                route: 'ChatScreen',
+                currentuser: item,
+              });
               //navigation.navigate('ConversationScreen', {currentuser: item});
             }}
-            cardTitle={item.sender_name}
+            cardTitle={
+              item?.sender_id === data?.id
+                ? item?.receiver_name
+                : item.sender_name
+            }
             time={item.created_at}
             msgTitle={item.message}
           />

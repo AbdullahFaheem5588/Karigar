@@ -8,19 +8,19 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import color from '../../Assets/colors/colors';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import HomeStackWithSearch from '../../Components/HomeStackWithSearch';
-import { Modal } from 'react-native-paper';
-import Icon, { Icons } from '../../Components/Icons';
+import {Modal} from 'react-native-paper';
+import Icon, {Icons} from '../../Components/Icons';
 import FlatListCard from '../../Components/FlatListCard';
 import BtnComp from '../../Components/BtnComp';
 import OngoingDropdown from '../../Components/OngoingDropdown';
 import MyWorkTabs from './AllTabs';
-import { BASE_URL } from '../Signin/Signin';
-const { height } = Dimensions.get('window');
-const { width } = Dimensions.get('window');
+import {BASE_URL} from '../Signin/Signin';
+const {height} = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
 const MyWork = () => {
   const navigation = useNavigation();
@@ -34,7 +34,9 @@ const MyWork = () => {
         onPressnotification={() => {
           navigation.navigate('edit_profile');
         }}
-        onChangeText={(val) => { setsearchTerm(val) }}
+        onChangeText={val => {
+          setsearchTerm(val);
+        }}
         value={searchTerm}
       />
       <MyWorkTabs value={searchTerm} />

@@ -33,10 +33,14 @@ import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
 import {BASE_URL} from '../Signin/Signin';
 import {useSelector} from 'react-redux';
+import CustomHeader from '../../Components/CustomHeader';
 const IndividualChat = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const checkroute = route.params.route;
+
   const currentprovider = route.params?.currentuser;
+  console.log('🚀 ~ IndividualChat ~ currentprovider:', currentprovider);
   // global.providerid = currentprovider.id;
   //console.log("🚀 ~ file: IndividualChat.js:26 ~ IndividualChat ~ currentprovider:", currentprovider.id)
   const [isModalVisible, setModalVisible] = useState(false);
@@ -63,7 +67,14 @@ const IndividualChat = () => {
     myHeaders.append('Authorization', `Bearer ${token}`);
 
     const formdata = new FormData();
-    formdata.append('receiver_id', currentprovider?.sender_id);
+    formdata.append(
+      'receiver_id',
+      checkroute === 'ExpertDeatil'
+        ? currentprovider?.id
+        : currentprovider?.sender_id === data?.id
+        ? currentprovider?.receiver_id
+        : currentprovider?.sender_id,
+    );
     formdata.append('message', addChat);
 
     const requestOptions = {
@@ -76,10 +87,8 @@ const IndividualChat = () => {
     fetch(`${BASE_URL}chat/send`, requestOptions)
       .then(response => response.json())
       .then(result => {
-        console.log('🚀 ~ sendMessage ~ result:', result);
-
         if (result && result.message === 'Message sent successfully') {
-          console.log('🚀 ~ sendMessage ~ resulsbjkshjkhdskjhskjt:', result);
+          setAddChat('');
           getchat();
         } else {
           Alert.alert(JSON.stringify(result));
@@ -94,7 +103,14 @@ const IndividualChat = () => {
 
     const formdata = new FormData();
     formdata.append('sender_id', data?.id);
-    formdata.append('receiver_id', currentprovider?.sender_id);
+    formdata.append(
+      'receiver_id',
+      checkroute === 'ExpertDeatil'
+        ? currentprovider?.id
+        : currentprovider?.sender_id === data?.id
+        ? currentprovider?.receiver_id
+        : currentprovider?.sender_id,
+    );
 
     const requestOptions = {
       method: 'POST',
@@ -163,6 +179,18 @@ const IndividualChat = () => {
 
   return (
     <>
+      <CustomHeader
+        title={
+          checkroute === 'ExpertDeatil'
+            ? currentprovider?.username
+            : currentprovider?.sender_id === data?.id
+            ? currentprovider?.receiver_name
+            : currentprovider.sender_name
+        }
+        onPressBack={() => {
+          navigation.goBack();
+        }}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? '50' : null}
         style={styles.container}>

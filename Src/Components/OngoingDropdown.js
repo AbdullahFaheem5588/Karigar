@@ -1,17 +1,17 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, {useState, useRef} from 'react';
+import {View, Text, StyleSheet} from 'react-native';
 import color from '../Assets/colors/colors';
-import { Picker } from '@react-native-picker/picker';
+import {Picker} from '@react-native-picker/picker';
 
-const OngoingDropdown = (props, { navigation }) => {
+const OngoingDropdown = (props, {navigation}) => {
   //const [selectedBusiness, setselectedBusiness] = useState(props.selectedValue);
   const pickerRef = useRef();
 
   const businessOptions = [
-    { label: 'Select Action', value: '0' },
-    { label: 'Inprogress', value: 'progress' },
-    { label: 'Complete', value: 'complete' },
-    { label: 'Reject', value: 'reject' },
+    {label: 'Select Action', value: '0'},
+    {label: 'Inprogress', value: 'pending'},
+    {label: 'Complete', value: 'confirmed'},
+    {label: 'Reject', value: 'cancelled'},
   ];
 
   return (
@@ -19,7 +19,9 @@ const OngoingDropdown = (props, { navigation }) => {
       <Picker
         ref={pickerRef}
         selectedValue={props.selectedBusiness}
-        onValueChange={(itemValue, itemIndex) => props.setselectedBusiness(itemValue)}
+        onValueChange={(itemValue, itemIndex) =>
+          props.setselectedBusiness(itemValue)
+        }
         enabled={true}
         mode={'dialog'}
         dropdownIconColor={color.default}

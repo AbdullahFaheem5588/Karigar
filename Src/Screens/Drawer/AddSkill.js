@@ -219,7 +219,7 @@ const AddSkill = props => {
                     <Picker.Item
                       key={role.key}
                       label={role.value}
-                      value={role.value}
+                      value={role.key}
                       color={color.default}
                       style={{
                         fontWeight: 'bold',
@@ -251,20 +251,6 @@ const AddSkill = props => {
             placeholderTextColor={color.gray}
             onChangeText={text => setDescription(text)}
           />
-
-          <TouchableOpacity style={styles.addSkill} onPress={handleFilePick}>
-            <Icons.Feather
-              name="paperclip"
-              size={25}
-              color={color.default}
-              style={styles.plusCont}
-            />
-            <Text style={styles.addMore}>
-              {file ? file?.name : 'Choose File'}
-            </Text>
-            {/* <Text style={[styles.addMore,
-            { color: 'red', marginLeft: 2 }]}>{JSON.stringify(file)}</Text> */}
-          </TouchableOpacity>
 
           <BtnComp
             BtnStyle={styles.BtnStyle}

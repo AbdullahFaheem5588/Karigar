@@ -64,7 +64,7 @@ const Signup = props => {
   const roles = [
     {key: 1, value: 'user'},
     {key: 2, value: 'provider'},
-    {key: 2, value: 'seller'},
+    {key: 3, value: 'seller'},
   ];
   const [file, setFile] = useState('');
   const [document, setDocument] = useState('');

@@ -1,77 +1,74 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  FlatList,
+} from 'react-native';
 import FlatListCard from '../../Components/FlatListCard';
 import color from '../../Assets/colors/colors';
-import { Modal } from 'react-native-paper';
-import { Icons } from '../../Components/Icons';
+import {Modal} from 'react-native-paper';
+import {Icons} from '../../Components/Icons';
 import OngoingDropdown from '../../Components/OngoingDropdown';
 import BtnComp from '../../Components/BtnComp';
 import Toast from 'react-native-simple-toast';
-import { useIsFocused } from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 
-import { BASE_URL } from '../Signin/Signin';
-const CompleteTab = (props) => {
+import {BASE_URL} from '../Signin/Signin';
+import {useSelector} from 'react-redux';
+const CompleteTab = props => {
+  const {token} = useSelector(state => state.TokenReducer);
+
   //console.log(props.value, 'on complete tab')
   const focus = useIsFocused();
   const [modalVisible, setModalVisible] = useState(false);
-  const [data, setData] = useState()
+  const [data, setData] = useState([]);
   const toggleModal = () => {
     setModalVisible(!modalVisible);
   };
 
-
-  const getservicestataus = () => {
-    console.log("books ervice status")
-  }
-
   useEffect(() => {
     GetData();
-  }, [focus, props?.value])
+  }, [focus]);
 
   const GetData = async () => {
-    try {
-      var myHeaders = new Headers();
-      myHeaders.append("Cookie", "PHPSESSID=pqe6giac1t2jjjqkr6sh3r747i");
+    const myHeaders = new Headers();
+    myHeaders.append('Authorization', `Bearer ${token}`);
 
-      var formdata = new FormData();
-      formdata.append("provider_id", global.id);
-      formdata.append("status", "complete");
-      if (props?.value) {
-        formdata.append("searchTerm", props?.value);
-      }
+    const requestOptions = {
+      method: 'GET',
+      headers: myHeaders,
+      redirect: 'follow',
+    };
 
-      var requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: formdata,
-        redirect: 'follow'
-      };
-      // const apiurl = "https://fisdemoprojects.com/skilledman/api/provider_status.php"
-      const apiurl = `${BASE_URL}provider_status.php`
-
-      const response = await fetch(apiurl, requestOptions)
-      const result = await response.json();
-      if (result && result.booking_request) {
-        setData(result.booking_request)
-      }
-      else if (result && result.error) {
-        Toast.show(result.error);
-      }
-    } catch (error) {
-      Alert.alert(error)
-    }
-
-  }
-  console.log(data, 'data')
+    fetch(`${BASE_URL}provider_bookings`, requestOptions)
+      .then(response => response.json())
+      .then(result => {
+        if (result && Array.isArray(result.bookings)) {
+          const confirmedBookings = result.bookings.filter(
+            booking => booking.status === 'completed',
+          );
+          if (confirmedBookings.length > 0) {
+            setData(confirmedBookings);
+          } else {
+            Toast.show('No bookings found.', Toast.LONG);
+          }
+        } else {
+          Alert.alert(JSON.stringify(result));
+        }
+      })
+      .catch(error => console.error(error));
+  };
   return (
-    <ScrollView style={[styles.container,{maxHeight:"51%"}]}>
-
+    <ScrollView style={[styles.container, {maxHeight: '51%'}]}>
       <FlatList
         data={data}
-        renderItem={({ item }) => (
+        renderItem={({item}) => (
           <FlatListCard
             cardTitle={item.name}
-            bookingId={`Booking ID - ${item.booking_id}`}
+            bookingId={`Booking ID - ${item.id}`}
             date={item.service_date}
             time={item.service_time}
             paidTitle="Paid"
