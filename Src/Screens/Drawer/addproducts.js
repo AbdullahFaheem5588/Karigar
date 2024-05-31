@@ -62,9 +62,6 @@ const AddProducts = props => {
       file === ''
     ) {
       Toast.show('please fill required field', Toast.SHORT);
-  const addNewProduct = async () => {
-    if (description == '' || name == '' || price == '' || stock == '') {
-      Toast.show('please fill required field', Toast.SHORT);
       return;
     }
     try {

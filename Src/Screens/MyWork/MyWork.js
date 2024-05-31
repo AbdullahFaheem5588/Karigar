@@ -19,6 +19,7 @@ import BtnComp from '../../Components/BtnComp';
 import OngoingDropdown from '../../Components/OngoingDropdown';
 import MyWorkTabs from './AllTabs';
 import {BASE_URL} from '../Signin/Signin';
+import HomeStackwithoutsearch from '../../Components/HomeStackwithoutsearch';
 const {height} = Dimensions.get('window');
 const {width} = Dimensions.get('window');
 
@@ -39,6 +40,7 @@ const MyWork = () => {
         }}
         value={searchTerm}
       />
+      <HomeStackwithoutsearch />
       <MyWorkTabs value={searchTerm} />
     </SafeAreaView>
   );

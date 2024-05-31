@@ -34,7 +34,6 @@ const RequestScreen = () => {
   const [searchTerm, setsearchTerm] = useState('');
 
   const toggleModal = item => {
-    console.log(item, 'modal item');
     setModalVisible(!modalVisible);
     setCurrentItem(item);
   };
