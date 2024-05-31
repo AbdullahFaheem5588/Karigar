@@ -50,7 +50,7 @@ const Signin = props => {
   };
 
   const navigation = useNavigation();
-  const [userName, setuserName] = React.useState('abdullah@gmail.com');
+  const [userName, setuserName] = React.useState('seller1@gmail.com');
   const [password, setPassword] = React.useState('12345678');
   const [hide, setHide] = React.useState(true);
   const [load, setLoad] = React.useState(false);
