@@ -80,7 +80,7 @@ const SellerDashBoard = () => {
   const [searchTerm, setsearchTerm] = useState('');
   const {token} = useSelector(state => state.TokenReducer);
 
-  const [skill, setskill] = useState([]); //
+  const [products, setProducts] = useState([]); //
   const [selectedshowJob, setselectedShowJob] = useState('');
   const [selectedslocation, setselectedsLocation] = useState('');
   const [selectedAccount, setselectedAccount] = useState('');
@@ -225,13 +225,13 @@ const SellerDashBoard = () => {
           redirect: 'follow',
         };
         // const apiurl ='https://fisdemoprojects.com/skilledman/api/get_services.php';
-        const apiurl = `${BASE_URL}get/services`;
+        const apiurl = `${BASE_URL}products`;
 
         const response = await fetch(apiurl, requestOptions);
         const result = await response.json();
         if (result && result.Service) {
           console.log('result services', result.Service);
-          setskill(result.Service);
+          setProducts(result);
         } else if (result.error) {
           Alert.alert(result.error);
         }
@@ -242,7 +242,7 @@ const SellerDashBoard = () => {
     getOverall();
   }, []);
 
-  const filteredData = skill.filter(item =>
+  const filteredData = products.filter(item =>
     item.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
   const toggleModal = () => {
