@@ -23,7 +23,7 @@ import HeaderWithSearchFilter from '../../Components/HeaderWithSearchFilter';
 import ServiceCard from '../../Components/ServiceCard';
 import BtnComp from '../../Components/BtnComp';
 import {useAuth} from '../../context/AuthProvider';
-import {BASE_URL} from '../Signin/Signin';
+import {BASE_URL, Img_URL} from '../Signin/Signin';
 import {useSelector} from 'react-redux';
 import ProductList from '../Drawer/ProductList';
 import ProductsCard from '../../Components/ProductsCard';
@@ -216,35 +216,34 @@ const AdminDashboard = () => {
     }
 
     const getOverall = async () => {
-      try {
-        var myHeaders = new Headers();
-        myHeaders.append('Authorization', `Bearer ${token}`);
+      var myHeaders = new Headers();
+      myHeaders.append('Authorization', `Bearer ${token}`);
 
-        var requestOptions = {
-          method: 'GET',
-          headers: myHeaders,
-          redirect: 'follow',
-        };
-        // const apiurl ='https://fisdemoprojects.com/skilledman/api/get_services.php';
-        const apiurl = `${BASE_URL}get/services`;
+      const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow',
+      };
 
-        const response = await fetch(apiurl, requestOptions);
-        const result = await response.json();
-        if (result && result.Service) {
-          console.log('result services', result.Service);
-          setskill(result.Service);
-        } else if (result.error) {
-          Alert.alert(result.error);
-        }
-      } catch (error) {
-        console.log(error);
-      }
+      fetch(`${BASE_URL}admin/user-list`, requestOptions)
+        .then(response => response.json())
+        .then(result => {
+          if (result && result?.all_users) {
+            console.log(
+              '🚀 ~ getOverall ~ result?.all_users:',
+              result?.all_users,
+            );
+            setskill(result?.all_users);
+          }
+        })
+        .catch(error => console.error(error));
     };
+
     getOverall();
   }, []);
 
   const filteredData = skill.filter(item =>
-    item.title.toLowerCase().includes(searchTerm.toLowerCase()),
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
   const toggleModal = () => {
     setModalVisible(!modalVisible);
@@ -288,15 +287,18 @@ const AdminDashboard = () => {
           }}>
           {filteredData?.map((itemdata, ind) => (
             <AdminCard
-              onPressView={() => navigation.navigate('providerDetail')}
+              onPressView={() =>
+                navigation.navigate('providerDetail', {currentData: itemdata})
+              }
               key={ind}
               showProfile={() => {
-                Fetchspecficdata(itemdata.title);
+                Fetchspecficdata(itemdata.name);
               }}
-              serviceTitle={itemdata.title}
+              email={itemdata.email}
+              serviceTitle={itemdata.name}
               // iconUrl={require('../../Assets/icons/Mechanics.png')}
               // iconUrl={`https://fisdemoprojects.com/skilledman/api/uploads//${itemdata.image}`}
-              iconUrl={`${BASE_URL}uploads//${itemdata.icon}`}
+              iconUrl={itemdata.image_path}
             />
           ))}
         </View>

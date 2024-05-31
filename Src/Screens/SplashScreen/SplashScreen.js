@@ -19,6 +19,7 @@ import color from '../../Assets/colors/colors';
 
 function SplashScreen({navigation}) {
   const {state, dispatch} = useAuth();
+
   const Focus = useIsFocused();
 
   const checkUserAuthAndRole = () => {
@@ -52,9 +53,6 @@ function SplashScreen({navigation}) {
   useEffect(() => {
     setTimeout(() => {
       checkUserAuthAndRole();
-      requestUserPermission();
-      notificationListener();
-      getToken();
     }, 2000);
   }, [Focus]);
   return (

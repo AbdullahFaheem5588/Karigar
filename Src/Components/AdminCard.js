@@ -11,25 +11,39 @@ import colors from '../Assets/colors/colors';
 import {Icons} from './Icons';
 import color from '../Assets/colors/colors';
 import {Badge} from 'react-native-paper';
+import {Img_URL, Img_URL_USER} from '../Screens/Signin/Signin';
 const {height} = Dimensions.get('window');
 const {width} = Dimensions.get('window');
 
 const AdminCard = props => {
+  const image = Img_URL_USER + props.iconUrl;
+  console.log('🚀 ~ AdminCard ~ image:', image);
   return (
     <View style={{flexDirection: 'row', flex: 1, width: '100%'}}>
       <View
         onPress={props.showProfile}
         style={[styles.textContainer, {...props.cardStyle}]}>
         <View style={{flexDirection: 'row'}}>
-          <Image
-            style={styles.logoImg}
-            resizeMode="contain"
-            // source={props.iconUrl}
-            source={{uri: 'https://dummyimage.com/hd1080'}}
-          />
+          {props.iconUrl === null ? (
+            <Image
+              style={styles.logoImg}
+              resizeMode="contain"
+              // source={props.iconUrl}
+              source={{uri: 'https://dummyimage.com/hd1080'}}
+            />
+          ) : (
+            <Image
+              style={styles.logoImg}
+              resizeMode="contain"
+              source={{uri: `${Img_URL_USER}${props.iconUrl}`}}
+
+              // source={{uri: 'https://dummyimage.com/hd1080'}}
+            />
+          )}
+
           <View style={{flexDirection: 'column'}}>
             <Text style={styles.TextStyle}>{props.serviceTitle}</Text>
-            <Text style={styles.TextStyle}>{'ali@gmail.com'}</Text>
+            <Text style={styles.TextStyle}>{props.email}</Text>
           </View>
         </View>
         <View style={{flexDirection: 'row', gap: 6}}>

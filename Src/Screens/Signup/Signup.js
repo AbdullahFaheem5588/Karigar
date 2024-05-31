@@ -101,6 +101,7 @@ const Signup = props => {
       console.log('File picker document', result[0]);
       if (result) {
         setDocument(result[0]);
+        console.log('🚀 ~ handleDocumentPick ~ result[0]:', result[0]);
       }
     } catch (error) {
       if (DocumentPicker.isCancel(error)) {
@@ -149,7 +150,24 @@ const Signup = props => {
   //   };
   //   fetchState();
   // }, []);
+  const validateFile = file => {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
 
+    if (file.size > maxSize) {
+      Alert.alert('File size exceeds the maximum limit of 5MB.');
+      return false;
+    }
+
+    if (!allowedTypes.includes(file.type)) {
+      Alert.alert(
+        'Invalid file type. Only JPEG, PNG, and PDF files are allowed.',
+      );
+      return false;
+    }
+
+    return true;
+  };
   const onRoleChange = selectedRole => {
     setSelectedRole(selectedRole);
   };
@@ -169,22 +187,35 @@ const Signup = props => {
       initialValues={initialValues}
       validationSchema={SignupValidationSchema}
       onSubmit={async value => {
-        console.log('🚀 ~ Signup ~ value:', value);
         try {
           setLoad(true);
-
+          if (
+            !file ||
+            !validateFile(file) ||
+            !document ||
+            !validateFile(document)
+          ) {
+            setLoad(false);
+            return;
+          }
           const formdata = new FormData();
           formdata.append('username', value.name);
           formdata.append('name', value.name);
           formdata.append('type', selectedRole);
           formdata.append('email', value.email);
           formdata.append('password', value.password);
-          {
-            file ? formdata.append('image', file) : null;
-          }
-          {
-            document ? formdata.append('document', document) : null;
-          }
+
+          formdata.append('image', {
+            uri: file.uri,
+            type: file.type,
+            name: file.name,
+          });
+          formdata.append('document', {
+            uri: document.uri,
+            type: document.type,
+            name: document.name,
+          });
+
           // Define the API endpoint
           // const apiUrl ='https://fisdemoprojects.com/skilledman/api/otp_register.php';
           const apiUrl = `${BASE_URL}register`;

@@ -40,6 +40,7 @@ import Modal from 'react-native-modal';
 
 export const BASE_URL = 'http://karigar.home.hinews.in/api/';
 export const Img_URL = 'http://karigar.home.hinews.in/public/images/';
+export const Img_URL_USER = 'http://karigar.home.hinews.in/public/';
 
 import {setToken} from '../../Redux/Actions/tokenAction';
 const Signin = props => {

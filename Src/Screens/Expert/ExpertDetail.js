@@ -29,6 +29,7 @@ const {height} = Dimensions.get('window');
 const {width} = Dimensions.get('window');
 import Toast from 'react-native-simple-toast';
 import {BASE_URL} from '../Signin/Signin';
+import {useSelector} from 'react-redux';
 
 const ExpertDetail = props => {
   const navigation = useNavigation();
@@ -59,6 +60,7 @@ const ExpertDetail = props => {
   const [rating, setRating] = useState(0);
   const [Feedback, setFeedback] = useState('');
   const [load, setLoad] = useState(false);
+  const {token} = useSelector(state => state.TokenReducer);
 
   // console.log('specfic user dataitem to get provider id', item.id);
   const toggleModal = () => {
@@ -146,56 +148,46 @@ const ExpertDetail = props => {
   const Bookservice = async () => {
     const bookingdate = date.toISOString().split('T')[0];
     const bookingtime = formatTime(date);
-    try {
-      setLoad(true);
-      var myHeaders = new Headers();
-      myHeaders.append('Cookie', 'PHPSESSID=jmv28htgkulr4v5gmt5n7us8go');
-      var formdata = new FormData();
+    const myHeaders = new Headers();
+    myHeaders.append('Authorization', `Bearer ${token}`);
 
-      formdata.append('provider_id', item?.id);
-      formdata.append('user_id', global?.id);
-      formdata.append('servic_phone_no', phoneNumber);
-      formdata.append('service_name', item?.service_name);
-      formdata.append('service_date', bookingdate);
-      formdata.append('address', address);
-      formdata.append('service_time', bookingtime);
-      formdata.append('price', price);
-      formdata.append('file', selectedfile);
-      global.pr = price;
-      console.log('pricesssamoun', JSON.stringify(formdata));
-
-      var requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: formdata,
-        redirect: 'follow',
-      };
-      // const apiurl ='https://fisdemoprojects.com/skilledman/api/user/book_service.php';
-      const apiurl = `${BASE_URL}user/book_service.php`;
-
-      const response = await fetch(apiurl, requestOptions);
-      const result = await response.json();
-
-      console.log('bookingidddd', result);
-      global.bookid = result.booking_id;
-      console.log('bokikiki', global.bookid);
-
-      if (result && result.status) {
-        setLoad(false);
-        Toast.show(result.status);
-        toggleModal();
-        handleNavigate();
-
-        // navigation.navigate('SelectPaymentMethod');
-      } else if (result?.error) {
-        setLoad(false);
-        console.log(result);
-        Alert.alert(result.error);
-      }
-    } catch (error) {
-      setLoad(false);
-      console.log('Error Book Services==>\n', error);
+    const formdata = new FormData();
+    formdata.append('provider_id', item?.user?.id);
+    formdata.append('skilled_id', item?.id);
+    formdata.append('booking_date', bookingdate);
+    formdata.append('notes', 'i need urgent base');
+    formdata.append('name', fullName);
+    formdata.append('price', price);
+    formdata.append('phone_no', phoneNumber);
+    formdata.append('address', address);
+    {
+      selectedfile ? formdata.append('image', selectedfile) : null;
     }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: formdata,
+      redirect: 'follow',
+    };
+
+    fetch(`${BASE_URL}book`, requestOptions)
+      .then(response => response.json())
+      .then(result => {
+        if (result) {
+          setLoad(false);
+          console.log(result, 'result');
+          toggleModal();
+          handleNavigate();
+
+          // navigation.navigate('SelectPaymentMethod');
+        } else {
+          setLoad(false);
+          console.log(result);
+          Alert.alert(result.error);
+        }
+      })
+      .catch(error => console.error(error));
   };
   const isAnyFieldEmpty =
     !fullName || !phoneNumber || !date || !address || !price;

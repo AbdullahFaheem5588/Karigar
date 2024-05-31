@@ -23,16 +23,20 @@ import InputEditProfile from '../../Components/InputEditProfile';
 import DocumentPicker from 'react-native-document-picker';
 import {Alert} from 'native-base';
 import Toast from 'react-native-simple-toast';
-import { BASE_URL } from '../Signin/Signin';
+import {BASE_URL} from '../Signin/Signin';
+import {useSelector} from 'react-redux';
 const EditProfileScreen = props => {
   const navigation = useNavigation();
+  const {data} = useSelector(state => state.ProfileReducer);
+  console.log('🚀 ~ EditProfileScreen ~ data:', data);
+
   const [profileData, setprofileData] = useState(null);
   //console.log(profileData,'profiel')
   const [phone, setPhone] = useState(null);
-  const [address, setAddress] = useState(null);
-  const [email, setemail] = useState(null);
-  const [name, setName] = useState(null);
-  const [experience, setExperience] = useState(null);
+  const [address, setAddress] = useState(data?.username);
+  const [email, setemail] = useState(data?.email);
+  const [name, setName] = useState(data?.name);
+  const [experience, setExperience] = useState('');
   const [image, setImage] = useState('');
   const [profileimg, setprofileimg] = useState(null);
   const [certficate, setCertficate] = React.useState();
@@ -82,7 +86,7 @@ const EditProfileScreen = props => {
     }
   };
 
-  console.log("experience",experience)
+  console.log('experience', experience);
   //pick pdf file
   const handleFilePick = async value => {
     try {
@@ -143,8 +147,7 @@ const EditProfileScreen = props => {
       };
 
       // const apiurl ='https://fisdemoprojects.com/skilledman/api/provider_profile.php';
-      const apiurl =`${BASE_URL}provider_profile.php`;
-
+      const apiurl = `${BASE_URL}provider_profile.php`;
 
       const response = await fetch(apiurl, requestOptions);
       const result = await response.json();
@@ -183,11 +186,7 @@ const EditProfileScreen = props => {
       //   'https://fisdemoprojects.com/skilledman/api/user/get_profile.php',
       //   requestOptions,
       // )
-      fetch(
-        `${BASE_URL}user/get_profile.php`,
-        requestOptions,
-      )
-
+      fetch(`${BASE_URL}user/get_profile.php`, requestOptions)
         .then(response => response.json())
         .then(result => {
           console.log(result);
@@ -231,7 +230,6 @@ const EditProfileScreen = props => {
                 source={{
                   // uri: `https://fisdemoprojects.com/skilledman/api/uploads/${profileData?.profile}`,
                   uri: `${BASE_URL}uploads/${profileData?.profile}`,
-
                 }}
                 style={{
                   width: 100,
@@ -313,46 +311,16 @@ const EditProfileScreen = props => {
             onChangeText={val => setExperience(val)}
             icon="star"
           />
-          <View style={styles.certContainer}>
-            <TouchableOpacity onPress={() => handleFilePick('Certificate')}>
-              <Icons.FontAwesome5
-                name="file-upload"
-                size={35}
-                color={color.default}
-                style={styles.iconCont}
-              />
-              <Text style={[styles.certiStyle, {color: 'black'}]}>
-                {certficate ? certficate?.name : 'Certificate'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleFilePick('Evidence')}>
-              <Icons.FontAwesome5
-                name="file-upload"
-                size={35}
-                color={color.default}
-                style={styles.iconCont}
-              />
-              <Text style={[styles.certiStyle, {color: 'black'}]}>
-                {Evidence ? Evidence?.name : 'Evidence'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleFilePick('Guarantor')}>
-              <Icons.FontAwesome5
-                name="file-upload"
-                size={35}
-                color={color.default}
-                style={styles.iconCont}
-              />
-              <Text style={[styles.certiStyle, {color: 'black'}]}>
-                {Guarantor ? Guarantor?.name : 'Guarantor'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+
           <BtnComp
             BtnStyle={styles.BtnStyle}
             onPressFunc={() => UpdateProfile()}
             btnText={
-              load ? <ActivityIndicator size={28} color="#f8f8ff" /> : 'Save changes'
+              load ? (
+                <ActivityIndicator size={28} color="#f8f8ff" />
+              ) : (
+                'Save changes'
+              )
             }
           />
         </View>
@@ -419,7 +387,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom:"6%",
+    marginBottom: '6%',
   },
   plusCont: {
     color: color.default,

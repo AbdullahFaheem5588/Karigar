@@ -4,28 +4,27 @@ import {
   StyleSheet,
   Pressable,
   TouchableOpacity,
-  ImageBackground, Linking
+  ImageBackground,
+  Linking,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import colors from '../Assets/colors/colors';
-import { Icons } from './Icons';
+import {Icons} from './Icons';
 import color from '../Assets/colors/colors';
-import { BASE_URL } from '../Screens/Signin/Signin';
+import {BASE_URL} from '../Screens/Signin/Signin';
 const BookingCard = props => {
   const openFile = () => {
     // const fileURL = `https://fisdemoprojects.com/skilledman/api/uploads/${props.filepress}`;
     const fileURL = `${BASE_URL}uploads/${props.filepress}`;
 
-
     // Use Linking to open the file URL
-    Linking.openURL(fileURL)
-      .catch((err) => {
-        console.error(`Error opening file: ${err}`);
-        // You can show an error message to the user if the file can't be opened
-      });
+    Linking.openURL(fileURL).catch(err => {
+      console.error(`Error opening file: ${err}`);
+      // You can show an error message to the user if the file can't be opened
+    });
   };
   return (
-    <View style={[styles.textContainer, { ...props.cardStyle }]}>
+    <View style={[styles.textContainer, {...props.cardStyle}]}>
       <View style={styles.openingStyle}>
         <Text style={styles.TextStyle}>{props.cardTitle}</Text>
         <View style={styles.rightCont}>
@@ -36,22 +35,28 @@ const BookingCard = props => {
               color={color.darkGray}
             />
           </TouchableOpacity>
-          <Text style={[styles.paidStyle, { ...props.dateCont, marginRight: 8 }]}>
+          <Text style={[styles.paidStyle, {...props.dateCont, marginRight: 8}]}>
             {props.paidTitle}
           </Text>
-          {props.status == "complete" ? <TouchableOpacity onPress={props.toggleReviewModal}>
-            <Icons.FontAwesome
-              name={"ellipsis-v"}
-              size={35}
-              color={"black"}
-            />
-          </TouchableOpacity> : null}
+          {props.status == 'confirmed' ? (
+            <TouchableOpacity onPress={props.toggleReviewModal}>
+              <Icons.FontAwesome
+                name={'ellipsis-v'}
+                size={35}
+                color={'black'}
+              />
+            </TouchableOpacity>
+          ) : null}
         </View>
       </View>
       <View style={styles.openingStyle}>
         <Text style={styles.bookingStyle}>{props.bookingId}</Text>
         <TouchableOpacity onPress={openFile}>
-          <Icons.FontAwesome name="file-text" size={25} color={color.darkGray} />
+          <Icons.FontAwesome
+            name="file-text"
+            size={25}
+            color={color.darkGray}
+          />
         </TouchableOpacity>
       </View>
       <View style={styles.openingStyle}>

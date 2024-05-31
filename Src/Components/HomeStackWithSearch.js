@@ -8,10 +8,13 @@ import OpeningCard from './OpeningCard';
 import SearchInput from './SearchInput';
 import {useIsFocused} from '@react-navigation/native';
 import {BASE_URL} from '../Screens/Signin/Signin';
+import {useSelector} from 'react-redux';
 const HomeStackWithSearch = (props, {navigation}) => {
   const focus = useIsFocused();
   const [profileData, setprofileData] = useState(null);
   const [name, setName] = useState(null);
+  const {data} = useSelector(state => state.ProfileReducer);
+
   const [profileimg, setprofileimg] = useState(null);
   useEffect(() => {
     if (profileData) {
@@ -82,7 +85,7 @@ const HomeStackWithSearch = (props, {navigation}) => {
           </TouchableOpacity>
         </View>
       </View>
-      <Text style={styles.userStyle}>Hi, {name}</Text>
+      <Text style={styles.userStyle}>Hi, {data?.name}</Text>
       {props.searchBAR === true ? (
         <View style={styles.searchStyle}>
           <SearchInput onChangeText={props.onChangeText} value={props.value} />

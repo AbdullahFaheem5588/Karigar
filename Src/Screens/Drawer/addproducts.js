@@ -3,15 +3,9 @@ import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
-  ImageBackground,
-  Image,
   ScrollView,
   StyleSheet,
-  ToastAndroid,
   TouchableOpacity,
-  Platform,
-  useColorScheme,
-  ALert,
   ActivityIndicator,
   Alert,
 } from 'react-native';
@@ -28,21 +22,16 @@ import {BASE_URL} from '../Signin/Signin';
 import {useSelector} from 'react-redux';
 
 const AddProducts = props => {
-  const pickerRef = useRef();
-
   const navigation = useNavigation();
   const {token} = useSelector(state => state.TokenReducer);
-  const {data} = useSelector(state => state.ProfileReducer);
 
-  const [NumberofEXp, setDescription] = useState('');
+  const [description, setDescription] = useState('');
   const [stock, setStock] = useState('');
 
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
 
   const [file, setFile] = useState('');
-  const [item, setItem] = useState([]);
-  const [selectedBusiness, setSelectedBusiness] = useState('Select Business');
   const [load, setLoad] = React.useState(false);
 
   const handleFilePick = async () => {
@@ -64,15 +53,15 @@ const AddProducts = props => {
     }
   };
 
-  const handleBusinessSelect = selectedValue => {
-    // You can do something with the selected value here, like set it in the state or use it in an API call.
-    // console.log("Selected Business:", selectedValue);
-    setSelectedBusiness(selectedValue);
-  };
-
-  const saveSkill = async () => {
-    if (NumberofEXp == '') {
-      Toast.show('please fill required field', Toast.LONG);
+  const addNewProduct = async () => {
+    if (
+      description == '' ||
+      name == '' ||
+      price == '' ||
+      stock == '' ||
+      file === ''
+    ) {
+      Toast.show('please fill required field', Toast.SHORT);
       return;
     }
     try {
@@ -80,17 +69,22 @@ const AddProducts = props => {
       const myHeaders = new Headers();
       myHeaders.append('Authorization', `Bearer ${token}`);
 
-      var formdata = new FormData();
-
-      formdata.append('speciality', selectedBusiness);
-      formdata.append('description', NumberofEXp);
+      const formdata = new FormData();
+      formdata.append('name', name);
+      formdata.append('description', description);
+      formdata.append('price', price);
+      formdata.append('stock', stock);
 
       {
-        file ? formdata.append('icon', file) : null;
+        formdata.append('icon', {
+          uri: file.uri,
+          type: file.type,
+          name: file.name,
+        });
       }
 
       // const apiUrl ='https://fisdemoprojects.com/skilledman/api/add_skills.php';
-      const apiUrl = `${BASE_URL}add_skilled`;
+      const apiUrl = `${BASE_URL}products`;
 
       var requestOptions = {
         method: 'POST',
@@ -103,10 +97,10 @@ const AddProducts = props => {
 
       if (result) {
         console.log(result);
-        // setLoad(false);
-        // Toast.show(result.status, Toast.LONG);
+        setLoad(false);
+        Toast.show('New Product Added Successfully', Toast.SHORT);
         // console.log('add skills', result.status);
-        // navigation.navigate('DashBoard');
+        navigation.navigate('DashBoard');
       } else if (result.error) {
         setLoad(false);
         Alert.alert(error);
@@ -116,70 +110,6 @@ const AddProducts = props => {
       console.log('error', error);
     }
   };
-
-  useEffect(() => {
-    const getOverall = async () => {
-      const myHeaders = new Headers();
-      myHeaders.append('Authorization', `Bearer ${token}`);
-
-      const requestOptions = {
-        method: 'GET',
-        headers: myHeaders,
-        redirect: 'follow',
-      };
-      fetch(`${BASE_URL}services-dropdown`, requestOptions)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(result => {
-          if (result && result.services) {
-            console.log('result add skill', result.services);
-            if (result.services.length > 0) {
-              let newArray = result.services.map(item => {
-                return {
-                  key: item.id,
-                  value: `${item.title}`,
-                };
-              });
-              setItem(newArray);
-            }
-          } else if (result.error) {
-            Alert.alert(result.error);
-          }
-        })
-        .catch(error => console.error(error));
-      // try {
-      //   var myHeaders = new Headers();
-      //   myHeaders.append('Authorization', `Bearer ${token}`);
-
-      //   // var urlencoded = new URLSearchParams();
-
-      //   var requestOptions = {
-      //     method: 'Get',
-      //     headers: myHeaders,
-      //     // body: urlencoded,
-      //     redirect: 'follow',
-      //   };
-      //  const apiurl = `${BASE_URL}get_skilled`;
-
-      //   const response = await fetch(apiurl, requestOptions);
-      //   const result = await response.json();
-      //   if (result && result.add_skills) {
-      //     console.log('result add skill', result.add_skills);
-      //     setItem(result.add_skills);
-      //   } else if (result.error) {
-      //     ALert.alert(result.error);
-      //   }
-      // } catch (error) {
-      //   console.log(error);
-      // }
-    };
-
-    getOverall();
-  }, []);
   return (
     <View style={{flex: 1}}>
       <CustomHeader
@@ -207,7 +137,7 @@ const AddProducts = props => {
 
           <C_SkillInputs
             style={{color: color.gray}}
-            value={NumberofEXp}
+            value={description}
             placeholder="Description"
             placeholderTextColor={color.gray}
             onChangeText={text => setDescription(text)}
@@ -237,7 +167,7 @@ const AddProducts = props => {
           <BtnComp
             BtnStyle={styles.BtnStyle}
             onPressFunc={() => {
-              saveSkill();
+              addNewProduct();
             }}
             btnText={
               load ? <ActivityIndicator size={28} color="#f8f8ff" /> : 'Save'
@@ -315,5 +245,4 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 });
-
 export default AddProducts;

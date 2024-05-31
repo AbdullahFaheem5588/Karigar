@@ -34,6 +34,7 @@ const BookingScreen = () => {
   const navigation = useNavigation();
   const {data} = useSelector(state => state.ProfileReducer);
   const {token} = useSelector(state => state.TokenReducer);
+  console.log('🚀 ~ BookingScreen ~ token:', token);
 
   const [Book_Data, setBook_Data] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -43,7 +44,7 @@ const BookingScreen = () => {
   const [Feedback, setFeedback] = useState('');
   const [Details, setDetails] = useState({});
   const [bookid, setBookid] = useState('');
-  const [provideid, setprovideId] = useState('');
+  const [provideid, setSkilledId] = useState('');
   useEffect(() => {
     BookingData();
   }, [focus]);
@@ -75,34 +76,26 @@ const BookingScreen = () => {
   };
 
   const SendRating = async () => {
-    try {
-      var myHeaders = new Headers();
-      myHeaders.append('Cookie', 'PHPSESSID=fhc8n3gq283lr08p22d9n0nfaa');
-      var formdata = new FormData();
-      formdata.append('user_id', global.id);
-      formdata.append('rating', rating);
-      formdata.append('feedback', Feedback);
-      formdata.append('provider_id', provideid);
-      formdata.append('bookingId', bookid);
-      var requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: formdata,
-        redirect: 'follow',
-      };
-      // const apiurl ='https://fisdemoprojects.com/skilledman/api/user/feedback.php';
-      const apiurl = `${BASE_URL}user/feedback.php`;
+    const myHeaders = new Headers();
+    myHeaders.append('Authorization', `Bearer ${token}`);
 
-      const response = await fetch(apiurl, requestOptions);
-      const result = await response.json();
-      if (result.success) {
-        Alert.alert(result && result.success);
-      } else if (result.error) {
-        Alert.alert(result.error);
-      }
-    } catch (error) {
-      console.log('error in review', error);
-    }
+    const formdata = new FormData();
+    formdata.append('comment_text', Feedback);
+    formdata.append('skilled_id', provideid);
+
+    const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: formdata,
+      redirect: 'follow',
+    };
+
+    fetch(`${BASE_URL}comments`, requestOptions)
+      .then(response => response.json())
+      .then(result => {
+        console.log('🚀 ~ .then ~ result:', result);
+      })
+      .catch(error => console.error(error));
   };
   const handleRating = rating => {
     setRating(rating);
@@ -112,7 +105,7 @@ const BookingScreen = () => {
   const toggleReview = (bookingid, providerId) => {
     console.log('booking ID', bookingid, 'providerId', providerId);
     setBookid(bookingid);
-    setprovideId(providerId);
+    setSkilledId(providerId);
     setReviewVisible(!reviewVisible);
     setModalVisible(false);
   };
@@ -164,7 +157,7 @@ const BookingScreen = () => {
             </TouchableOpacity>
           </View>
           <View style={styles.modalBody}>
-            <View style={styles.iconCont}>
+            {/* <View style={styles.iconCont}>
               <StarRating
                 disabled={false}
                 maxStars={5}
@@ -179,7 +172,7 @@ const BookingScreen = () => {
                 fullStarColor="gold"
                 halfStarColor="orange"
               />
-            </View>
+            </View> */}
             <C_TextInput
               styles={{fontWeight: '400'}}
               numberOfLines={5}
@@ -280,9 +273,8 @@ const BookingScreen = () => {
                 status={item.status}
                 paidTitle={item.booking_date && item.booking_date.split(' ')[0]}
                 dateCont={styles.dateCont}
-                filepress={item.file}
                 toggleReviewModal={() => {
-                  toggleReview(item.id, item.provider_id);
+                  toggleReview(item.id, item.skilled_id);
                   getDetails(item);
                 }}
                 // toggleReviewModal={() => console.log("helo baby ", "provideer id", item.booking_id, item.provider_id)}

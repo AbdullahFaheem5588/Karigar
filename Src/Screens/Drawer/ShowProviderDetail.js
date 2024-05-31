@@ -19,17 +19,19 @@ import {
 import color from '../../Assets/colors/colors';
 import CustomHeader from '../../Components/CustomHeader';
 import Icon, {Icons} from '../../Components/Icons';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import BtnComp from '../../Components/BtnComp';
 import DocumentPicker from 'react-native-document-picker';
 import C_SkillInputs from '../../Components/C_SkillInput';
 import Toast from 'react-native-simple-toast';
-import {BASE_URL} from '../Signin/Signin';
+import {BASE_URL, Img_URL_USER} from '../Signin/Signin';
 import {useSelector} from 'react-redux';
 
 const ShowProviderDetails = props => {
   const pickerRef = useRef();
-
+  const route = useRoute();
+  const userData = route?.params?.currentData;
+  console.log('🚀 ~ ShowProviderDetails ~ userData:', userData);
   const navigation = useNavigation();
   const {token} = useSelector(state => state.TokenReducer);
   const {data} = useSelector(state => state.ProfileReducer);
@@ -67,52 +69,25 @@ const ShowProviderDetails = props => {
     // console.log("Selected Business:", selectedValue);
     setSelectedBusiness(selectedValue);
   };
+  const VerifiedUser = async () => {
+    var myHeaders = new Headers();
+    myHeaders.append('Authorization', `Bearer ${token}`);
 
-  const saveSkill = async () => {
-    if (NumberofEXp == '') {
-      Toast.show('please fill required field', Toast.LONG);
-      return;
-    }
-    try {
-      setLoad(true);
-      const myHeaders = new Headers();
-      myHeaders.append('Authorization', `Bearer ${token}`);
+    const requestOptions = {
+      method: 'PATCH',
+      headers: myHeaders,
+      redirect: 'follow',
+    };
 
-      var formdata = new FormData();
-
-      formdata.append('speciality', selectedBusiness);
-      formdata.append('description', NumberofEXp);
-
-      {
-        file ? formdata.append('icon', file) : null;
-      }
-
-      // const apiUrl ='https://fisdemoprojects.com/skilledman/api/add_skills.php';
-      const apiUrl = `${BASE_URL}add_skilled`;
-
-      var requestOptions = {
-        method: 'POST',
-        body: formdata,
-        headers: myHeaders,
-        redirect: 'follow',
-      };
-      const response = await fetch(apiUrl, requestOptions);
-      const result = await response.json();
-
-      if (result) {
-        console.log(result);
-        // setLoad(false);
-        // Toast.show(result.status, Toast.LONG);
-        // console.log('add skills', result.status);
-        // navigation.navigate('DashBoard');
-      } else if (result.error) {
-        setLoad(false);
-        Alert.alert(error);
-      }
-    } catch (error) {
-      setLoad(false);
-      console.log('error', error);
-    }
+    fetch(`${BASE_URL}admin/verify-user/${userData?.id}`, requestOptions)
+      .then(response => response.json())
+      .then(result => {
+        if (result && result?.message) {
+          Toast.show(result?.message, Toast.LONG);
+          navigation.navigate('DashBoard');
+        }
+      })
+      .catch(error => console.error(error));
   };
 
   useEffect(() => {
@@ -188,77 +163,62 @@ const ShowProviderDetails = props => {
       />
       <ScrollView>
         <View style={{padding: 20}}>
-          <Image
-            style={styles.logoImg}
-            resizeMode="contain"
-            // source={props.iconUrl}
-            source={{uri: 'https://dummyimage.com/hd1080'}}
-          />
+          {userData.image_path === null ? (
+            <Image
+              style={styles.logoImg}
+              resizeMode="contain"
+              // source={props.iconUrl}
+              source={{uri: 'https://dummyimage.com/hd1080'}}
+            />
+          ) : (
+            <Image
+              style={styles.logoImg}
+              resizeMode="contain"
+              source={{uri: `${Img_URL_USER}${userData.image_path}`}}
+
+              // source={{uri: 'https://dummyimage.com/hd1080'}}
+            />
+          )}
           <C_SkillInputs
             style={{color: color.gray}}
-            value={name}
+            value={userData.name || 'N/A'}
+            disable={true}
             placeholder="Name"
             placeholderTextColor={color.gray}
-            onChangeText={text => setName(text)}
           />
           <C_SkillInputs
             style={{color: color.gray}}
-            value={price}
+            value={userData.email || 'N/A'}
+            disable={true}
             placeholder="Email"
             placeholderTextColor={color.gray}
-            onChangeText={text => setPrice(text)}
           />
 
           <C_SkillInputs
             style={{color: color.gray}}
-            value={NumberofEXp}
+            value={userData?.username || 'N/A'}
             placeholder="User Name"
             placeholderTextColor={color.gray}
-            onChangeText={text => setDescription(text)}
           />
-
-          <TouchableOpacity style={styles.addSkill} onPress={handleFilePick}>
-            <Icons.Feather
-              name="paperclip"
-              size={25}
-              color={color.default}
-              style={styles.plusCont}
-            />
-            <Text style={styles.addMore}>
-              {file ? file?.name : 'Choose File'}
-            </Text>
-            {/* <Text style={[styles.addMore,
-            { color: 'red', marginLeft: 2 }]}>{JSON.stringify(file)}</Text> */}
-          </TouchableOpacity>
 
           <View
             style={{
               flexDirection: 'row',
-              justifyContent: 'space-between',
+
               alignItems: 'center',
               marginTop: 20,
             }}>
             <TouchableOpacity
+              onPress={VerifiedUser}
               style={{
                 justifyContent: 'center',
                 alignItems: 'center',
-                width: '45%',
+                width: '100%',
                 paddingVertical: 10,
                 backgroundColor: color.default,
                 borderRadius: 10,
               }}>
-              <Text style={{color: 'white'}}>Accept</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '45%',
-                paddingVertical: 10,
-                backgroundColor: color.red,
-                borderRadius: 10,
-              }}>
-              <Text style={{color: 'white'}}>Reject</Text>
+              <Text style={{color: 'white'}}>Action</Text>
             </TouchableOpacity>
           </View>
         </View>

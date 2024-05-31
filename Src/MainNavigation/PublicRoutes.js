@@ -34,12 +34,12 @@ const PublicRoutes = () => {
         component={SplashScreen}
         options={{headerShown: false}}
       />
-         <Stack.Screen
+      <Stack.Screen
         name="Forgetpassword1"
         component={Forgetpassword1}
         options={{headerShown: false}}
       />
-       <Stack.Screen
+      <Stack.Screen
         name="ForgetpasswordOtpScreen"
         component={ForgetpasswordOtpScreen}
         options={{headerShown: false}}

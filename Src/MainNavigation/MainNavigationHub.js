@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, Button, Image, BackHandler } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { NativeBaseProvider } from 'native-base';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React, {useState} from 'react';
+import {View, Text, Button, Image, BackHandler} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {NativeBaseProvider} from 'native-base';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 // import SplashScreen from '../Screens/SplashScreen/SplashScreen';
 // import Parent from '../Screens/Parent';
 // import IndividualChat from '../Screens/Chat/IndividualChat';
@@ -23,38 +23,27 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 // import CardDetail from '../Screens/Payment/CardDetail';
 // import PaymentCongratulations from '../Screens/Payment/Congratulations';
 // import UserChat from '../Screens/Chat/UserChat';
-import { AuthProvider, useAuth } from '../context/AuthProvider';
+import {AuthProvider, useAuth} from '../context/AuthProvider';
 import ForgotPassword from '../Screens/Forgot_Password/forgot_password';
 import SettingForgetPassword from '../Screens/SettingForgetPassword/SettingForgetPassword';
 import NavigationService from './NavigationService';
 import PublicRoutes from './PublicRoutes';
 import PrivateRoute from './PrivateRoute';
 
-
-
-
-
-
-
 // import UsersTab from '../Screens/UserDashboard';
-
 
 const Stack = createNativeStackNavigator();
 
 const MainNavigationHub = () => {
   const [isSplashScreenShown, setIsSplashScreenShown] = useState(false);
 
-
-
-  const { state, dispatch } = useAuth();
-
-  console.log("value in state in main navigation hub",state)
+  let state = false;
 
   return (
     <NativeBaseProvider>
       <NavigationContainer
         screenOptions={{
-          headerLeft: ({ onPress }) => (
+          headerLeft: ({onPress}) => (
             <Ionicons
               name="arrow-back"
               size={24}
@@ -63,16 +52,11 @@ const MainNavigationHub = () => {
             />
           ),
         }}
-        ref={(ref) => NavigationService.setTopLevelNavigator(ref)}
-      >
-
-
-
-        {state.role ? (<PrivateRoute />) : (<PublicRoutes />)}
-
+        ref={ref => NavigationService.setTopLevelNavigator(ref)}>
+        {state ? <PrivateRoute /> : <PublicRoutes />}
       </NavigationContainer>
     </NativeBaseProvider>
   );
-}
+};
 
 export default MainNavigationHub;

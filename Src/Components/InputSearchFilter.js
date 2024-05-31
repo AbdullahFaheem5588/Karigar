@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   Dimensions,
   StyleSheet,
@@ -6,12 +6,12 @@ import {
   View,
   TouchableOpacity,
 } from 'react-native';
-import { Icons } from '../Components/Icons';
+import {Icons} from '../Components/Icons';
 import LinearGradient from 'react-native-linear-gradient';
 
 import color from '../Assets/colors/colors';
 const InputSearchFilter = props => {
-  const { mode = 'outlined', toggleModal } = props;
+  const {mode = 'outlined', toggleModal} = props;
   const [text, setText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   console.log(props.screen, 'toggle here');
@@ -23,14 +23,14 @@ const InputSearchFilter = props => {
         style={{
           flex: 1,
           paddingLeft: 10,
-          color:color.default
+          color: color.default,
         }}
         value={props.value}
-        placeholder="Search for services"
+        placeholder="Search "
         placeholderTextColor={color.default}
         onChangeText={props.onChangeText}
       />
-      {props.screen ? null :
+      {props.screen ? null : (
         <TouchableOpacity onPress={toggleModal}>
           <LinearGradient
             style={styles.sliderStyle}
@@ -38,7 +38,7 @@ const InputSearchFilter = props => {
             <Icons.FontAwesome name="sliders" size={18} color={color.white} />
           </LinearGradient>
         </TouchableOpacity>
-      }
+      )}
     </View>
   );
 };
