@@ -16,7 +16,9 @@ const {width} = Dimensions.get('window');
 
 const ProductsCard = props => {
   return (
-    <View style={{flexDirection: 'row', flex: 1, width: '100%'}}>
+    <TouchableOpacity
+      style={{flexDirection: 'row', flex: 1, width: '100%'}}
+      onPress={props.onPress}>
       <View
         onPress={props.showProfile}
         style={[styles.textContainer, {...props.cardStyle}]}>
@@ -24,27 +26,15 @@ const ProductsCard = props => {
           <Image
             style={styles.logoImg}
             resizeMode="contain"
-            // source={props.iconUrl}
-            source={{uri: 'https://dummyimage.com/hd1080'}}
+            source={props.iconUrl}
           />
           <View style={{flexDirection: 'column'}}>
             <Text style={styles.TextStyle}>{props.serviceTitle}</Text>
             <Text style={styles.TextStyle}>{'200'}</Text>
           </View>
         </View>
-        <View style={{flexDirection: 'row', gap: 6}}>
-          <TouchableOpacity style={{paddingHorizontal: 2}}>
-            <Icons.AntDesign name={'eye'} size={20} color={color.blueGreen} />
-          </TouchableOpacity>
-          <TouchableOpacity style={{paddingHorizontal: 2}}>
-            <Icons.Feather name={'edit'} size={20} color={color.default} />
-          </TouchableOpacity>
-          <TouchableOpacity style={{paddingHorizontal: 2}}>
-            <Icons.AntDesign name={'delete'} size={20} color={color.red} />
-          </TouchableOpacity>
-        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

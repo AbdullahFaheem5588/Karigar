@@ -43,6 +43,7 @@ export const Img_URL = 'http://karigar.home.hinews.in/public/images/';
 export const Img_URL_USER = 'http://karigar.home.hinews.in/public/';
 
 import {setToken} from '../../Redux/Actions/tokenAction';
+import {tokens} from 'react-native-paper/lib/typescript/styles/themes/v3/tokens';
 const Signin = props => {
   const dispatch = useDispatch();
   const initialValues = {
@@ -51,7 +52,7 @@ const Signin = props => {
   };
 
   const navigation = useNavigation();
-  const [userName, setuserName] = React.useState('seller1@gmail.com');
+  const [userName, setuserName] = React.useState('user1@gmail.com');
   const [password, setPassword] = React.useState('12345678');
   const [hide, setHide] = React.useState(true);
   const [load, setLoad] = React.useState(false);
@@ -352,6 +353,7 @@ const Signin = props => {
         } else {
           Alert.alert(JSON.stringify(message));
         }
+        console.log(access_token);
       })
       .catch(error => console.error(error));
   };

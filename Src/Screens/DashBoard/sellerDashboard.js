@@ -1,253 +1,172 @@
 import React, {useRef, useEffect, useState} from 'react';
 import {
-  ImageBackground,
-  StyleSheet,
+  Image,
+  Modal,
   Text,
   TouchableOpacity,
   View,
   Dimensions,
-  Platform,
-  ToastAndroid,
-  Image,
+  StyleSheet,
+  ScrollView,
   TextInput,
-  FlatList,
+  ToastAndroid,
   Alert,
-  Modal,
 } from 'react-native';
 import color from '../../Assets/colors/colors';
-import {ScrollView, useAccessibleColors} from 'native-base';
-//import Modal from 'react-native-modal';
-import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {Icons} from '../../Components/Icons';
+import DocumentPicker from 'react-native-document-picker';
 import HeaderWithSearchFilter from '../../Components/HeaderWithSearchFilter';
-import ServiceCard from '../../Components/ServiceCard';
-import BtnComp from '../../Components/BtnComp';
-import {useAuth} from '../../context/AuthProvider';
-import {BASE_URL} from '../Signin/Signin';
-import {useSelector} from 'react-redux';
-import ProductList from '../Drawer/ProductList';
 import ProductsCard from '../../Components/ProductsCard';
-import ProductOptions from '../../Components/producOptions';
+import BtnComp from '../../Components/BtnComp';
+import {useSelector} from 'react-redux';
+import {BASE_URL, Img_URL_USER} from '../Signin/Signin';
 
-const {height} = Dimensions.get('window');
-const {width} = Dimensions.get('window');
+const {height, width} = Dimensions.get('window');
 
-const locations = [
-  {
-    id: '1',
-    name: 'Eastern Cape',
-  },
-  {
-    id: '2',
-    name: 'Gauteng',
-  },
-  {
-    id: '3',
-    name: 'KwaZulu-Natal',
-  },
-  {
-    id: '4',
-    name: 'Limpopo',
-  },
-  {
-    id: '5',
-    name: 'Nort West',
-  },
-  {
-    id: '6',
-    name: 'Rawalpindi',
-  },
-];
-
-const accounts = [
-  {
-    id: '1',
-    name: 'Verified',
-  },
-  {
-    id: '2',
-    name: 'Non Verified',
-  },
-];
 const SellerDashBoard = () => {
-  const isfocused = useIsFocused();
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
-  const [showJob, setShowJob] = useState(false); // Initially show the Job section
-  const [showLocation, setShowLocation] = useState(false); // Initially show the Location section
-  const [showAccount, setShowAccount] = useState(false); // Initially show the Account section
-  const [modalTitle, setModalTitle] = useState('Filter');
-  const [searchTerm, setsearchTerm] = useState('');
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const {token} = useSelector(state => state.TokenReducer);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [products, setProducts] = useState([]);
 
-  const [products, setProducts] = useState([]); //
-  const [selectedshowJob, setselectedShowJob] = useState('');
-  const [selectedslocation, setselectedsLocation] = useState('');
-  const [selectedAccount, setselectedAccount] = useState('');
-  const {state} = useAuth();
-  const [signinmodal, setsigninmodal] = useState();
-  //   const toggleModal = () => {
-  //     setModalVisible(!modalVisible);
-  //     setShowLocation(false);
-  //     setShowJob(false);
-  //     setShowAccount(false);
-  //   };
-
-  const toggleBack = () => {
-    setShowLocation(false);
-    setShowJob(false);
-    setShowAccount(false);
-  };
-
-  // Function to toggle the visibility of the Job section
-  const toggleJob = () => {
-    setShowJob(true);
-    console.log(showJob);
-    setModalTitle(showJob ? 'Filter' : 'Job');
-  };
-
-  // Function to toggle the visibility of the Location section
-  const toggleLocation = () => {
-    setShowLocation(true);
-    console.log(showLocation);
-    setModalTitle(showLocation ? 'Filter' : 'Location');
-  };
-
-  // Function to toggle the visibility of the Account section
-  const toggleAccount = () => {
-    setShowAccount(true);
-    console.log(showAccount);
-    setModalTitle(showAccount ? 'Filter' : 'Account');
-  };
-
-  const handleAccount = value => {
-    setselectedAccount(value);
-  };
-  const handleLocation = value => {
-    setselectedsLocation(value);
-  };
-  const handleJob = value => {
-    setselectedShowJob(value);
-  };
-  const [selectedBusiness, setselectedBusiness] = useState('0');
-
-  console.log('selectedShow JOB filter', selectedshowJob);
-  console.log('selectedShow JOB filterlocation', selectedslocation);
-  console.log('selectedShow Account filter', selectedAccount);
-
-  const applyFilter = async () => {
-    // navigation.navigate('FindExpert')
+  const getOverall = async () => {
     try {
-      var myHeaders = new Headers();
-      myHeaders.append('Cookie', 'PHPSESSID=djpeho05m1o2dmm2p8k1vaill4');
-      var formdata = new FormData();
-      formdata.append('job', selectedshowJob);
-      formdata.append('Location', selectedslocation);
-      formdata.append('accounts', selectedAccount);
+      const myHeaders = new Headers();
+      myHeaders.append('Authorization', `Bearer ${token}`);
 
-      var requestOptions = {
-        method: 'POST',
+      const requestOptions = {
+        method: 'GET',
         headers: myHeaders,
-        body: formdata,
         redirect: 'follow',
       };
-      const apiurl =
-        'https://fisdemoprojects.com/skilledman/api/user/getdata.php';
+      const apiurl = `${BASE_URL}products`;
 
       const response = await fetch(apiurl, requestOptions);
       const result = await response.json();
-      if (result.add_skills) {
-        console.log('result useeffect', result.add_skills);
-
-        Alert.alert(JSON.stringify(result.add_skills));
+      if (result) {
+        setProducts(result.products);
       } else if (result.error) {
         Alert.alert(result.error);
       }
     } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // api
-  const Fetchspecficdata = async value => {
-    console.log('value to fetch', value);
-
-    try {
-      var myHeaders = new Headers();
-      myHeaders.append('Cookie', 'PHPSESSID=lccmaap9lnt4db1mjf1247d3md');
-
-      var formdata = new FormData();
-      formdata.append('job', value);
-      formdata.append('user_id', global.id);
-
-      var requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: formdata,
-        redirect: 'follow',
-      };
-      // const apiurl ="https://fisdemoprojects.com/skilledman/api/user/providers_job.php"
-      const apiurl = `${BASE_URL}user/providers_job.php`;
-
-      const response = await fetch(apiurl, requestOptions);
-      const result = await response.json();
-      console.log('result of expert ', result);
-
-      if (result && result.add_skills) {
-        console.log(`result of ${value}`, result);
-        navigation.navigate('FindExpert', {data: result.add_skills});
-      } else if (result.error) {
-        Alert.alert(result.error);
-      }
-    } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
   useEffect(() => {
-    // alert
-
-    {
-      state.isAuth == true
-        ? //Alert.alert('Disclaimer notice')
-          setModalVisible(true)
-        : null;
-    }
-
-    const getOverall = async () => {
-      try {
-        var myHeaders = new Headers();
-        myHeaders.append('Authorization', `Bearer ${token}`);
-
-        var requestOptions = {
-          method: 'GET',
-          headers: myHeaders,
-          redirect: 'follow',
-        };
-        // const apiurl ='https://fisdemoprojects.com/skilledman/api/get_services.php';
-        const apiurl = `${BASE_URL}products`;
-
-        const response = await fetch(apiurl, requestOptions);
-        const result = await response.json();
-        if (result && result.Service) {
-          console.log('result services', result.Service);
-          setProducts(result);
-        } else if (result.error) {
-          Alert.alert(result.error);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
     getOverall();
   }, []);
 
+  const deleteProduct = async id => {
+    try {
+      const myHeaders = new Headers();
+      myHeaders.append('Authorization', `Bearer ${token}`);
+
+      const requestOptions = {
+        method: 'DELETE',
+        headers: myHeaders,
+        redirect: 'follow',
+      };
+      const apiurl = `${BASE_URL}products/${id}`;
+
+      const response = await fetch(apiurl, requestOptions);
+      const result = await response.json();
+      if (response.ok) {
+        ToastAndroid.show('Product deleted successfully', ToastAndroid.SHORT);
+        getOverall();
+        toggleModal();
+      } else {
+        ToastAndroid.show('Failed to delete product', ToastAndroid.SHORT);
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error);
+    }
+  };
+
   const filteredData = products.filter(item =>
-    item.title.toLowerCase().includes(searchTerm.toLowerCase()),
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
   const toggleModal = () => {
     setModalVisible(!modalVisible);
   };
+
+  const toggleEditModal = () => {
+    setEditModalVisible(!editModalVisible);
+  };
+
+  const handleShowProduct = product => {
+    setSelectedProduct(product);
+    toggleModal();
+  };
+
+  const handleEditProduct = () => {
+    toggleModal();
+    toggleEditModal();
+  };
+
+  const handleUpdateProduct = async () => {
+    try {
+      const myHeaders = new Headers();
+      myHeaders.append('Authorization', `Bearer ${token}`);
+      myHeaders.append('Content-Type', 'application/json');
+
+      const requestOptions = {
+        method: 'PUT',
+        headers: myHeaders,
+        body: JSON.stringify({
+          name: selectedProduct.name,
+          description: selectedProduct.description,
+          price: selectedProduct.price,
+          stock: selectedProduct.stock,
+          image_path: {
+            uri: selectedProduct.image_path.uri,
+            type: selectedProduct.image_path.type,
+            name: selectedProduct.image_path.name,
+          },
+        }),
+        redirect: 'follow',
+      };
+
+      const apiurl = `${BASE_URL}products/${selectedProduct.id}`;
+
+      const response = await fetch(apiurl, requestOptions);
+      const result = await response.json();
+
+      if (response.ok) {
+        ToastAndroid.show('Product updated successfully', ToastAndroid.SHORT);
+        getOverall();
+        toggleEditModal();
+      } else {
+        ToastAndroid.show('Failed to update product', ToastAndroid.SHORT);
+      }
+    } catch (error) {
+      console.error('Error updating product:', error);
+    }
+  };
+
+  const handleFilePick = async () => {
+    try {
+      const result = await DocumentPicker.pick({
+        type: [DocumentPicker.types.allFiles],
+      });
+      if (result) {
+        setSelectedProduct({...selectedProduct, image_path: result[0]});
+      }
+    } catch (error) {
+      if (DocumentPicker.isCancel(error)) {
+        // User canceled the document picker
+      } else {
+        console.error('Error occurred while picking document:', error);
+        throw error;
+      }
+    }
+  };
+
   return (
     <View style={{flex: 1}}>
       <TouchableOpacity
@@ -261,7 +180,6 @@ const SellerDashBoard = () => {
           right: 20,
           width: 50,
           height: 50,
-
           borderRadius: 100,
         }}
         onPress={() => navigation.navigate('addProducts')}>
@@ -271,7 +189,7 @@ const SellerDashBoard = () => {
         onPress={() => {
           navigation.openDrawer();
         }}
-        onPressNotifiction={() => {
+        onPressNotification={() => {
           navigation.navigate('notification_screen');
         }}
         onPressProfile={() => {
@@ -279,12 +197,11 @@ const SellerDashBoard = () => {
         }}
         titleText="What are you looking for?"
         bellIcon="bell"
-        // toggleModal={toggleModal}
         onChangeText={val => {
-          setsearchTerm(val);
+          setSearchTerm(val);
         }}
         value={searchTerm}
-        screen={'user'}
+        screen="user"
       />
       <ScrollView
         style={{
@@ -302,16 +219,16 @@ const SellerDashBoard = () => {
             flex: 1,
             marginBottom: 30,
           }}>
-          {filteredData?.map((itemdata, ind) => (
+          {filteredData.map((itemdata, ind) => (
             <ProductsCard
+              onPress={() => handleShowProduct(itemdata)}
               key={ind}
-              showProfile={() => {
-                Fetchspecficdata(itemdata.title);
-              }}
-              serviceTitle={itemdata.title}
-              // iconUrl={require('../../Assets/icons/Mechanics.png')}
-              // iconUrl={`https://fisdemoprojects.com/skilledman/api/uploads//${itemdata.image}`}
-              iconUrl={`${BASE_URL}uploads//${itemdata.icon}`}
+              serviceTitle={itemdata.name}
+              iconUrl={
+                itemdata.image_path === null
+                  ? {uri: 'https://dummyimage.com/hd1080'}
+                  : {uri: `${Img_URL_USER}${itemdata.image_path}`}
+              }
             />
           ))}
         </View>
@@ -322,397 +239,263 @@ const SellerDashBoard = () => {
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
-              <TouchableOpacity onPress={() => toggleModal()}>
+              <Text style={styles.modalTitle}>Product Details</Text>
+              <TouchableOpacity onPress={toggleModal}>
                 <Icons.FontAwesome5
                   name="times"
                   color={color.white}
                   size={20}
-                  style={styles.closeStyle}
                 />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.successmodalBody}>
-              <ProductOptions
-                selectedBusiness={selectedBusiness}
-                setselectedBusiness={setselectedBusiness}
-              />
-            </View>
+            {selectedProduct && (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.productImageContainer}>
+                  {selectedProduct.image_path === null ? (
+                    <Image
+                      style={styles.productImage}
+                      resizeMode="contain"
+                      source={{uri: 'https://dummyimage.com/hd1080'}}
+                    />
+                  ) : (
+                    <Image
+                      style={styles.productImage}
+                      resizeMode="contain"
+                      source={{
+                        uri: `${Img_URL_USER}${selectedProduct.image_path}`,
+                      }}
+                    />
+                  )}
+                </View>
 
-            <View style={styles.btnContainer}>
-              <BtnComp
-                BtnStyle={styles.acceptStyle}
-                btnTextStyle={styles.btnTextStyle}
-                btnText="Submit"
-                onPressFunc={() => {
-                  // Pass the selected booking_id
-                  toggleModal();
-                }}
-              />
-            </View>
+                <View style={styles.productDetails}>
+                  <Text style={styles.productName}>{selectedProduct.name}</Text>
+                  <Text style={styles.productDescription}>
+                    {selectedProduct.description}
+                  </Text>
+                  <View style={styles.productStats}>
+                    <View style={styles.statItem}>
+                      <Text style={styles.statLabel}>Price</Text>
+                      <Text style={styles.statValue}>
+                        ${selectedProduct.price}
+                      </Text>
+                    </View>
+                    <View style={styles.statItem}>
+                      <Text style={styles.statLabel}>Stock</Text>
+                      <Text style={styles.statValue}>
+                        {selectedProduct.stock}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                <View style={styles.btnContainer}>
+                  <BtnComp
+                    btnText="Edit"
+                    BtnStyle={styles.BtnStyle}
+                    onPressFunc={handleEditProduct}
+                  />
+                  <BtnComp
+                    btnText="Delete"
+                    BtnStyle={styles.BtnStyle}
+                    onPressFunc={() => deleteProduct(selectedProduct.id)}
+                  />
+                </View>
+              </ScrollView>
+            )}
           </View>
         </View>
       </Modal>
-      {/* <Modal
+      <Modal
         animationType="slide"
         transparent={true}
-        visible={signinmodal}
-        onRequestClose={() => setsigninmodal()}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
+        visible={editModalVisible}
+        onRequestClose={() => setEditModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Account Type</Text>
+              <Text style={styles.modalTitle}>Edit Product</Text>
+              <TouchableOpacity onPress={toggleEditModal}>
+                <Icons.FontAwesome5
+                  name="times"
+                  color={color.white}
+                  size={20}
+                />
+              </TouchableOpacity>
             </View>
 
-            <View style={styles.modalBody}>
-            <View style={styles.btnContainer}>
-                <BtnComp
-                  BtnStyle={styles.acceptStyle}
-                  btnTextStyle={styles.btnTextStyle}
-                  btnText="Sign In As User"
-                  onPressFunc={() => {
-                    setsigninmodal(false);
-                  }}
-                />
-              </View>
-              <View style={styles.btnContainer}>
-                <BtnComp
-                  BtnStyle={styles.acceptStyle}
-                  btnTextStyle={styles.btnTextStyle}
-                  btnText="Sign In As Provider"
-                  onPressFunc={() => {
-                    setsigninmodal(false);
-                    navigation.navigate('PublicRoutes', { screen: 'AddBusiness' });
-                  }}
-                />
-              </View>
-               
-             
-            </View>
+            {selectedProduct && (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <TouchableOpacity
+                  style={styles.productImageContainer}
+                  onPress={handleFilePick}>
+                  {selectedProduct.image_path === null ? (
+                    <Image
+                      style={styles.productImage}
+                      resizeMode="contain"
+                      source={{uri: 'https://dummyimage.com/hd1080'}}
+                    />
+                  ) : (
+                    <Image
+                      style={styles.productImage}
+                      resizeMode="contain"
+                      source={{
+                        uri: `${Img_URL_USER}${selectedProduct.image_path}`,
+                      }}
+                    />
+                  )}
+                </TouchableOpacity>
+
+                <View style={styles.productDetails}>
+                  <TextInput
+                    style={styles.productNameInput}
+                    value={selectedProduct.name}
+                    onChangeText={text =>
+                      setSelectedProduct({...selectedProduct, name: text})
+                    }
+                  />
+                  <TextInput
+                    style={styles.productDescriptionInput}
+                    value={selectedProduct.description}
+                    onChangeText={text =>
+                      setSelectedProduct({
+                        ...selectedProduct,
+                        description: text,
+                      })
+                    }
+                  />
+                  <View style={styles.productStats}>
+                    <View style={styles.statItem}>
+                      <Text style={styles.statLabel}>Price</Text>
+                      <TextInput
+                        style={styles.statValueInput}
+                        value={`${selectedProduct.price}`}
+                        onChangeText={text =>
+                          setSelectedProduct({
+                            ...selectedProduct,
+                            price: parseFloat(text),
+                          })
+                        }
+                      />
+                    </View>
+                    <View style={styles.statItem}>
+                      <Text style={styles.statLabel}>Stock</Text>
+                      <TextInput
+                        style={styles.statValueInput}
+                        value={`${selectedProduct.stock}`}
+                        onChangeText={text =>
+                          setSelectedProduct({
+                            ...selectedProduct,
+                            stock: parseInt(text, 10),
+                          })
+                        }
+                      />
+                    </View>
+                  </View>
+                </View>
+                <View style={styles.btnContainer}>
+                  <BtnComp
+                    btnText="Save"
+                    BtnStyle={styles.BtnStyle}
+                    onPressFunc={handleUpdateProduct}
+                  />
+                </View>
+              </ScrollView>
+            )}
           </View>
         </View>
-      </Modal> */}
+      </Modal>
     </View>
   );
 };
 
 export default SellerDashBoard;
+
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#fff',
-  },
-  backgroundImg: {
-    height: '100%',
-  },
-  confirmBtn: {
-    backgroundColor: color.darkGreen,
-    paddingVertical: 10,
-    alignItems: 'center',
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
-    borderRadius: 6,
-    width: '40%',
-    marginTop: 10,
-    marginHorizontal: 10,
-    marginBottom: 10,
-  },
-  confirmText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: color.white,
-  },
-  modalStyle: {
-    // shadowOffset: {width: 100, height: 0},
-    // shadowOpacity: 1,
-    // backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    alignItems: 'center',
   },
   modalContainer: {
-    borderTopRightRadius: 20,
-    borderTopLeftRadius: 20,
-    marginLeft: 0,
-    marginRight: 0,
-    height: '100%',
-  },
-  modalBody: {
-    flexDirection: 'column',
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-  },
-  modalView: {
-    borderRadius: 12,
-    alignSelf: 'center',
     backgroundColor: color.white,
-  },
-  successmodalBody: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    borderRadius: 10,
+    width: '90%',
+    maxHeight: '90%',
   },
   modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: color.default,
-    alignItems: 'flex-end',
-    paddingVertical: 17,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
     borderTopRightRadius: 10,
     borderTopLeftRadius: 10,
   },
-  iconCont: {
-    width: '38%',
+  modalTitle: {
+    color: color.white,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
-  iconStyle: {
-    fontSize: 30,
-    color: color.darkGreen,
-    position: 'absolute',
-    right: -180,
-    top: 10,
+  productImageContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
   },
-
-  modalView: {
-    borderRadius: 12,
-    width: '100%',
-    alignSelf: 'center',
-    backgroundColor: color.white,
+  productImage: {
+    width: '80%',
+    height: 200,
+  },
+  productDetails: {
+    padding: 20,
+  },
+  productNameInput: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: color.gray,
+  },
+  productDescriptionInput: {
+    fontSize: 16,
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: color.gray,
+  },
+  productStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: color.gray,
+  },
+  statValueInput: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    borderBottomWidth: 1,
+    borderBottomColor: color.gray,
+    paddingVertical: 5,
+    textAlign: 'center',
   },
   btnContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-    flexDirection: 'row',
-  },
-  modalBody: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    height: '90%',
-  },
-  jobTitle: {
-    fontWeight: 'bold',
-    fontSize: 17,
-    color: color.default,
-    paddingTop: 5,
-  },
-  cardCont: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  headStyle: {
-    fontSize: 19,
-    fontWeight: '700',
-    color: color.black,
-    paddingVertical: 10,
-  },
-  linearGradientStyle: {
-    alignItems: 'center',
-    elevation: 0,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 6,
-    justifyContent: 'center',
-  },
-  locationCont: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 10,
-  },
-  chStyle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: color.Green,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    height: 50,
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    borderRadius: 10,
-    backgroundColor: color.lightgreen,
-  },
-  locStyle: {
-    fontSize: 16,
-    color: color.lightGray,
-  },
-  deliverStyle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: color.black,
-    paddingHorizontal: 10,
-  },
-  imgStyle: {
-    marginRight: 10,
-  },
-  location: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  loginBtn: {
-    borderRadius: 5,
-    backgroundColor: 'transparent',
-    width: '50%',
-    marginTop: 7,
-  },
-  btnText: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  prodName: {
-    color: color.black,
-    fontWeight: '700',
-    fontSize: 20,
-  },
-  linearGradientStyle: {
-    alignItems: 'center',
-    elevation: 0,
-    paddingHorizontal: 6,
-    paddingVertical: 6,
-    borderRadius: 6,
-    justifyContent: 'center',
-  },
-  priceStyle: {
-    fontSize: 16,
-    color: color.Green,
-    fontWeight: '600',
-    marginTop: 7,
-  },
-  listimgStyle: {
-    width: 80,
-    height: 80,
-  },
-  CardContainer: {
-    marginTop: -60,
-  },
-  cardContent: {
-    width: '94%',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    paddingVertical: 12,
-    borderRadius: 10,
-    marginBottom: 8,
-    margin: 0,
-  },
-  chartContainer: {
-    backgroundColor: color.white,
-    marginTop: 20,
-    borderRadius: 10,
-    elevation: 1,
-  },
-  incomeStyle: {
-    fontSize: 17,
-    color: color.black,
-    fontWeight: '500',
-  },
-  filterCont: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-
-  modalHeader: {
-    backgroundColor: color.default,
-    alignItems: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    borderTopRightRadius: 10,
-    borderTopLeftRadius: 10,
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  logoImg: {
-    width: width / 4,
-    height: height / 8,
-    marginTop: -55,
-    borderRadius: 10,
-  },
-  bookingStyle: {
-    fontSize: 14,
-    color: color.gray,
-    fontWeight: '400',
-    textAlign: 'left',
-  },
-  openingStyle: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '93%',
-    marginBottom: 15,
-  },
-  dateTimeCont: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingVertical: 6,
-  },
-  dateStyle: {
-    fontSize: 14,
-    color: color.yellow,
-    fontWeight: '400',
-    textAlign: 'left',
-  },
-
-  modalTitle: {
-    fontSize: 19,
-    color: color.white,
-    fontWeight: '600',
-  },
-  cancelCont: {
-    position: 'absolute',
-    right: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  angleRight: {
-    marginLeft: 5,
-  },
-  jobsCont: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    borderBottomWidth: 0.5,
-    borderBottomColor: color.gray,
-    paddingBottom: 5,
-    marginTop: 20,
+    padding: 10,
   },
   BtnStyle: {
-    marginVertical: 15,
-  },
-
-  listCont: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    flex: 1,
-  },
-  itemStyle: {
-    backgroundColor: color.ligthOrange,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 6,
-    width: '97%',
-    marginBottom: 5,
-  },
-  flatCont: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    width: '100%',
-  },
-  itemName: {
-    color: color.white,
-    textAlign: 'center',
+    width: '47%',
+    marginBottom: '10%',
   },
 });

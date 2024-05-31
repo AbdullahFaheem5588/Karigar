@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -14,46 +14,100 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import HeaderWithSearchFilter from '../../Components/HeaderWithSearchFilter';
-import {BASE_URL} from '../Signin/Signin';
+import {BASE_URL, Img_URL_USER} from '../Signin/Signin';
 import BtnComp from '../../Components/BtnComp';
 import Icon, {Icons} from '../../Components/Icons'; // Import custom Icon component
 import color from '../../Assets/colors/colors';
+import {useSelector} from 'react-redux';
 
 const {height, width} = Dimensions.get('window');
 
 const ProductsScreen = props => {
   const navigation = useNavigation();
-  const [productList, setProductList] = useState([
-    {
-      product_id: '1',
-      name: 'Product One',
-      price: 10.0,
-      image: 'product1.jpg',
-      rating: '4.5',
-    },
-    {
-      product_id: '2',
-      name: 'Product Two',
-      price: 20.0,
-      image: 'product2.jpg',
-      rating: '4.0',
-    },
-    {
-      product_id: '3',
-      name: 'Product Three',
-      price: 15.0,
-      image: 'product3.jpg',
-      rating: '4.8',
-    },
-  ]);
+  const {token} = useSelector(state => state.TokenReducer);
+  const [productList, setProductList] = useState([]);
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [cartVisible, setCartVisible] = useState(false);
 
+  const getProducts = async () => {
+    try {
+      const myHeaders = new Headers();
+      myHeaders.append('Authorization', `Bearer ${token}`);
+
+      const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow',
+      };
+      const apiurl = `${BASE_URL}products`;
+
+      const response = await fetch(apiurl, requestOptions);
+      const result = await response.json();
+      if (result) {
+        setProductList(result.products);
+      } else if (result.error) {
+        Alert.alert(result.error);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getProducts();
+  }, []);
+
+  const addToCartDb = async id => {
+    try {
+      const myHeaders = new Headers();
+      myHeaders.append('Authorization', `Bearer ${token}`);
+
+      const formdata = new FormData();
+      formdata.append('product_id', id);
+      formdata.append('quantity', 1);
+
+      const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: formdata,
+        redirect: 'follow',
+      };
+
+      fetch(`${BASE_URL}add-to-carts`, requestOptions)
+        .then(response => response.text())
+        .then(result => console.log(result))
+        .catch(error => console.error(error));
+    } catch (error) {
+      console.error('Error Adding to Cart:', error);
+    }
+  };
+  const minusToCartDb = async (id, qty) => {
+    try {
+      const myHeaders = new Headers();
+      myHeaders.append('Authorization', `Bearer ${token}`);
+
+      const formdata = new FormData();
+      formdata.append('product_id', id);
+      formdata.append('quantity', qty);
+
+      const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: formdata,
+        redirect: 'follow',
+      };
+
+      fetch(`${BASE_URL}minus-to-carts`, requestOptions)
+        .then(response => response.text())
+        .then(result => console.log(result))
+        .catch(error => console.error(error));
+    } catch (error) {
+      console.error('Error Adding to Cart:', error);
+    }
+  };
   const addToCart = item => {
-    const exists = cart.some(
-      cartItem => cartItem.product_id === item.product_id,
-    );
+    const exists = cart.some(cartItem => cartItem.id === item.id);
     if (exists) {
       ToastAndroid.show(
         `Product ${item.name} is already in the cart!`,
@@ -61,6 +115,7 @@ const ProductsScreen = props => {
       );
     } else {
       setCart(prev => [...prev, {...item, quantity: 1}]);
+      addToCartDb(item.id);
       ToastAndroid.show(
         `Product ${item.name} added to cart!`,
         ToastAndroid.SHORT,
@@ -68,29 +123,39 @@ const ProductsScreen = props => {
     }
   };
 
-  const increaseQuantity = product_id => {
-    setCart(prevCart =>
-      prevCart.map(item =>
-        item.product_id === product_id
-          ? {...item, quantity: item.quantity + 1}
-          : item,
-      ),
-    );
+  const increaseQuantity = product => {
+    const item = cart.find(item => item.id === product.id);
+    if (item.quantity < product.stock) {
+      setCart(prevCart =>
+        prevCart.map(item =>
+          item.id === product.id
+            ? {...item, quantity: item.quantity + 1}
+            : item,
+        ),
+      );
+      addToCartDb(product.id);
+    } else {
+      ToastAndroid.show('Product Out of Stock!', ToastAndroid.SHORT);
+    }
   };
 
-  const decreaseQuantity = product_id => {
+  const decreaseQuantity = product => {
     setCart(prevCart =>
       prevCart
         .map(item =>
-          item.product_id === product_id
+          item.id === product.id
             ? {...item, quantity: item.quantity - 1}
             : item,
         )
         .filter(item => item.quantity > 0),
     );
+    minusToCartDb(product.id, 1);
   };
 
   const clearCart = () => {
+    cart.map(item => {
+      minusToCartDb(item.id, item.quantity);
+    });
     setCart([]);
     setCartVisible(false);
   };
@@ -197,22 +262,35 @@ const ProductsScreen = props => {
           keyExtractor={(item, index) => index.toString()}
           numColumns={2}
           columnWrapperStyle={styles.row}
-          renderItem={({item}) => (
-            <View style={styles.productCard}>
-              <Image
-                source={{uri: `${BASE_URL}uploads/${item.image}`}}
-                style={styles.productImage}
-              />
-              <Text style={styles.productName}>{item.name}</Text>
-              <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
-              <Text style={styles.productRating}>Rating: {item.rating}</Text>
-              <BtnComp
-                BtnStyle={styles.BtnStyle}
-                btnText={'Add to Cart'}
-                onPressFunc={() => addToCart(item)}
-              />
-            </View>
-          )}
+          renderItem={({item}) =>
+            item.stock > 0 ? (
+              <View style={styles.productCard}>
+                {item.image_path === null ? (
+                  <Image
+                    style={styles.productImage}
+                    resizeMode="contain"
+                    source={{uri: 'https://dummyimage.com/hd1080'}}
+                  />
+                ) : (
+                  <Image
+                    style={styles.productImage}
+                    resizeMode="contain"
+                    source={{
+                      uri: `${Img_URL_USER}${item.image_path}`,
+                    }}
+                  />
+                )}
+                <Text style={styles.productName}>{item.name}</Text>
+                <Text style={styles.productPrice}>${item.price}</Text>
+                <Text style={styles.productRating}>Rating: 3.0</Text>
+                <BtnComp
+                  BtnStyle={styles.BtnStyle}
+                  btnText={'Add to Cart'}
+                  onPressFunc={() => addToCart(item)}
+                />
+              </View>
+            ) : null
+          }
         />
         <TouchableOpacity
           style={styles.fab}
@@ -250,16 +328,27 @@ const ProductsScreen = props => {
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({item}) => (
                   <View style={styles.cartItem}>
-                    <Image
-                      source={{uri: `${BASE_URL}uploads/${item.image}`}}
-                      style={styles.cartItemImage}
-                    />
+                    {item.image_path === null ? (
+                      <Image
+                        style={styles.cartItemImage}
+                        resizeMode="contain"
+                        source={{uri: 'https://dummyimage.com/hd1080'}}
+                      />
+                    ) : (
+                      <Image
+                        style={styles.cartItemImage}
+                        resizeMode="contain"
+                        source={{
+                          uri: `${Img_URL_USER}${item.image_path}`,
+                        }}
+                      />
+                    )}
                     <View style={styles.cartItemDetails}>
                       <Text style={styles.cartItemName}>{item.name}</Text>
                       <View style={styles.quantityContainer}>
                         <TouchableOpacity
                           style={styles.quantityButton}
-                          onPress={() => decreaseQuantity(item.product_id)}>
+                          onPress={() => decreaseQuantity(item)}>
                           <Text style={styles.quantityButtonText}>-</Text>
                         </TouchableOpacity>
                         <Text style={styles.cartItemQuantity}>
@@ -267,7 +356,7 @@ const ProductsScreen = props => {
                         </Text>
                         <TouchableOpacity
                           style={styles.quantityButton}
-                          onPress={() => increaseQuantity(item.product_id)}>
+                          onPress={() => increaseQuantity(item)}>
                           <Text style={styles.quantityButtonText}>+</Text>
                         </TouchableOpacity>
                       </View>

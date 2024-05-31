@@ -1,5 +1,5 @@
 import {Picker} from '@react-native-picker/picker';
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-
 import color from '../../Assets/colors/colors';
 import CustomHeader from '../../Components/CustomHeader';
 import Icon, {Icons} from '../../Components/Icons';
@@ -27,19 +26,16 @@ const AddProducts = props => {
 
   const [description, setDescription] = useState('');
   const [stock, setStock] = useState('');
-
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
-
-  const [file, setFile] = useState('');
-  const [load, setLoad] = React.useState(false);
+  const [file, setFile] = useState(null);
+  const [load, setLoad] = useState(false);
 
   const handleFilePick = async () => {
     try {
       const result = await DocumentPicker.pick({
         type: [DocumentPicker.types.allFiles],
       });
-      console.log('File picker result', result[0]);
       if (result) {
         setFile(result[0]);
       }
@@ -47,23 +43,18 @@ const AddProducts = props => {
       if (DocumentPicker.isCancel(error)) {
         // User canceled the document picker
       } else {
-        console.log('error occur on document picking', error);
-        throw error; // Throw the correct error
+        console.error('Error occurred while picking document:', error);
+        throw error;
       }
     }
   };
 
   const addNewProduct = async () => {
-    if (
-      description == '' ||
-      name == '' ||
-      price == '' ||
-      stock == '' ||
-      file === ''
-    ) {
-      Toast.show('please fill required field', Toast.SHORT);
+    if (!description || !name || !price || !stock || !file) {
+      Toast.show('Please fill all required fields', Toast.SHORT);
       return;
     }
+
     try {
       setLoad(true);
       const myHeaders = new Headers();
@@ -74,49 +65,45 @@ const AddProducts = props => {
       formdata.append('description', description);
       formdata.append('price', price);
       formdata.append('stock', stock);
+      formdata.append('image', {
+        uri: file.uri,
+        type: file.type,
+        name: file.name,
+      });
 
-      {
-        formdata.append('icon', {
-          uri: file.uri,
-          type: file.type,
-          name: file.name,
-        });
-      }
-
-      // const apiUrl ='https://fisdemoprojects.com/skilledman/api/add_skills.php';
       const apiUrl = `${BASE_URL}products`;
 
-      var requestOptions = {
+      const requestOptions = {
         method: 'POST',
         body: formdata,
-        headers: myHeaders,
-        redirect: 'follow',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
       };
+
       const response = await fetch(apiUrl, requestOptions);
       const result = await response.json();
 
+      setLoad(false);
+
       if (result) {
-        console.log(result);
-        setLoad(false);
         Toast.show('New Product Added Successfully', Toast.SHORT);
-        // console.log('add skills', result.status);
         navigation.navigate('DashBoard');
       } else if (result.error) {
-        setLoad(false);
-        Alert.alert(error);
+        Alert.alert('Error', result.error);
       }
     } catch (error) {
       setLoad(false);
-      console.log('error', error);
+      console.error('Error occurred while adding product:', error);
     }
   };
+
   return (
     <View style={{flex: 1}}>
       <CustomHeader
         title="Add Products"
-        onPressBack={() => {
-          props.navigation.goBack();
-        }}
+        onPressBack={() => props.navigation.goBack()}
       />
       <ScrollView>
         <View style={{padding: 20}}>
@@ -134,7 +121,6 @@ const AddProducts = props => {
             placeholderTextColor={color.gray}
             onChangeText={text => setPrice(text)}
           />
-
           <C_SkillInputs
             style={{color: color.gray}}
             value={description}
@@ -149,7 +135,6 @@ const AddProducts = props => {
             placeholderTextColor={color.gray}
             onChangeText={text => setStock(text)}
           />
-
           <TouchableOpacity style={styles.addSkill} onPress={handleFilePick}>
             <Icons.Feather
               name="paperclip"
@@ -158,17 +143,12 @@ const AddProducts = props => {
               style={styles.plusCont}
             />
             <Text style={styles.addMore}>
-              {file ? file?.name : 'Choose File'}
+              {file ? file.name : 'Choose File'}
             </Text>
-            {/* <Text style={[styles.addMore,
-            { color: 'red', marginLeft: 2 }]}>{JSON.stringify(file)}</Text> */}
           </TouchableOpacity>
-
           <BtnComp
             BtnStyle={styles.BtnStyle}
-            onPressFunc={() => {
-              addNewProduct();
-            }}
+            onPressFunc={addNewProduct}
             btnText={
               load ? <ActivityIndicator size={28} color="#f8f8ff" /> : 'Save'
             }
@@ -188,7 +168,6 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: '100%',
-
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 10,
@@ -245,4 +224,5 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 });
+
 export default AddProducts;
